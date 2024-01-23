@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.27)
-project(digisim C)
+project(digisim LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CPP_STANDARD 17)
+
+add_subdirectory(external)
 
 add_library(digisim STATIC
     include/digisim/component.h
@@ -30,6 +33,4 @@ add_library(digisim STATIC
 
 target_include_directories(digisim PUBLIC include)
 
-add_executable(digisim-test main.c)
-
-target_link_libraries(digisim-test PUBLIC digisim)
+add_subdirectory(tests)

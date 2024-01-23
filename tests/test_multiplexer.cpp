@@ -1,8 +1,12 @@
-#include <digisim/components/all.h>
+#include <catch2/catch_all.hpp>
 
+extern "C" {
 #include <digisim/wire.h>
+#include <digisim/component.h>
+#include <digisim/components/all.h>
+}
 
-int main() {
+TEST_CASE("Test Multiplexer Creation") {
     DiInput a;
     DiInput b;
     DiInput c;
@@ -75,6 +79,4 @@ int main() {
     di_wire_destroy(&and1ToSum);
     di_wire_destroy(&and2ToSum);
     di_wire_destroy(&sumToF);
-
-    return 0;
 }

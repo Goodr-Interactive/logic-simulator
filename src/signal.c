@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DI_SIGNAL_U64_COUNT(bits) (bits + 63) / 64
+#define DI_SIGNAL_U64_COUNT(bits) ((bits + 63) / 64 * DI_BIT_REPRESENTATION_SIZE)
 
 DiBit di_bit_logical(bool value) {
     if (value) {
@@ -45,7 +45,7 @@ void di_signal_set(DiSignal *signal, size_t index, DiBit bit) {
 
     uint64_t value = values[i];
 
-    value &= ~(DI_BIT_REPRESENTATION_MASK << (off * DI_BIT_REPRESENTATION_SIZE));
+    value &= ~((size_t)DI_BIT_REPRESENTATION_MASK << (off * DI_BIT_REPRESENTATION_SIZE));
     value |= (uint64_t)(bit) << (off * DI_BIT_REPRESENTATION_SIZE);
 
     values[i] = value;
@@ -54,6 +54,8 @@ void di_signal_set(DiSignal *signal, size_t index, DiBit bit) {
 void di_signal_fill(DiSignal *signal, DiBit fill) {
     for (size_t a = 0; a < signal->bits; a++) {
         di_signal_set(signal, a, fill);
+
+        assert(di_signal_get(signal, a) == fill);
     }
 }
 
