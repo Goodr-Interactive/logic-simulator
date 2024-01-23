@@ -1,9 +1,9 @@
 #include <catch2/catch_all.hpp>
 
 extern "C" {
-#include <digisim/wire.h>
-#include <digisim/component.h>
-#include <digisim/components/all.h>
+#include <digisim/node.h>
+#include <digisim/element.h>
+#include <digisim/elements/all.h>
 }
 
 TEST_CASE("Test Multiplexer Creation") {
@@ -16,13 +16,13 @@ TEST_CASE("Test Multiplexer Creation") {
     DiNot flip;
     DiOutput f;
 
-    DiWire aToAnd1;
-    DiWire cToAnd2;
-    DiWire bToGates;
-    DiWire flipToAnd2;
-    DiWire and1ToSum;
-    DiWire and2ToSum;
-    DiWire sumToF;
+    DiNode aToAnd1;
+    DiNode cToAnd2;
+    DiNode bToGates;
+    DiNode flipToAnd2;
+    DiNode and1ToSum;
+    DiNode and2ToSum;
+    DiNode sumToF;
 
     di_input_init(&a, 1);
     di_input_init(&b, 1);
@@ -33,13 +33,13 @@ TEST_CASE("Test Multiplexer Creation") {
     di_or_init(&sum, 1);
     di_output_init(&f, 1);
 
-    di_wire_init(&aToAnd1);
-    di_wire_init(&cToAnd2);
-    di_wire_init(&bToGates);
-    di_wire_init(&flipToAnd2);
-    di_wire_init(&and1ToSum);
-    di_wire_init(&and2ToSum);
-    di_wire_init(&sumToF);
+    di_node_init(&aToAnd1);
+    di_node_init(&cToAnd2);
+    di_node_init(&bToGates);
+    di_node_init(&flipToAnd2);
+    di_node_init(&and1ToSum);
+    di_node_init(&and2ToSum);
+    di_node_init(&sumToF);
 
     di_connect(&aToAnd1, &a.output);
     di_connect(&aToAnd1, &and1.input_a);
@@ -72,11 +72,11 @@ TEST_CASE("Test Multiplexer Creation") {
     di_or_destroy(&sum);
     di_output_destroy(&f);
 
-    di_wire_destroy(&aToAnd1);
-    di_wire_destroy(&cToAnd2);
-    di_wire_destroy(&bToGates);
-    di_wire_destroy(&flipToAnd2);
-    di_wire_destroy(&and1ToSum);
-    di_wire_destroy(&and2ToSum);
-    di_wire_destroy(&sumToF);
+    di_node_destroy(&aToAnd1);
+    di_node_destroy(&cToAnd2);
+    di_node_destroy(&bToGates);
+    di_node_destroy(&flipToAnd2);
+    di_node_destroy(&and1ToSum);
+    di_node_destroy(&and2ToSum);
+    di_node_destroy(&sumToF);
 }

@@ -1,15 +1,15 @@
 #pragma once
 
-#include <digisim/component.h>
-#include <digisim/connection.h>
+#include <digisim/element.h>
+#include <digisim/terminal.h>
 
 typedef struct di_not_t {
-    DiComponent component;
+    DiElement element;
 
     size_t bits;
 
-    DiConnection input;
-    DiConnection output;
+    DiTerminal input;
+    DiTerminal output;
 } DiNot;
 
 void di_not_init(DiNot *self, size_t bits);

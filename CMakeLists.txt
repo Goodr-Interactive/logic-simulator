@@ -7,24 +7,24 @@ set(CMAKE_CPP_STANDARD 17)
 add_subdirectory(external)
 
 add_library(digisim STATIC
-    include/digisim/component.h
-    include/digisim/connection-list.h
-    include/digisim/wire.h
-    include/digisim/components/and.h
-    include/digisim/components/or.h
-    include/digisim/components/all.h
-    include/digisim/components/input.h
-    include/digisim/components/output.h
-    include/digisim/connection.h
+    include/digisim/element.h
+    include/digisim/node-list.h
+    include/digisim/node.h
+    include/digisim/elements/and.h
+    include/digisim/elements/or.h
+    include/digisim/elements/all.h
+    include/digisim/elements/input.h
+    include/digisim/elements/output.h
+    include/digisim/terminal.h
     include/digisim/signal.h
-    include/digisim/components/not.h
+    include/digisim/elements/not.h
 
-    src/component.c
-    src/connection-list.c
-    src/wire.c
+    src/element.c
+    src/node-list.c
+    src/node.c
     src/components/and.c
     src/components/or.c
-    src/connection.c
+    src/terminal.c
     src/signal.c
     src/components/input.c
     src/components/not.c

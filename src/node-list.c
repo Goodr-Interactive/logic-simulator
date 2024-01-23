@@ -1,36 +1,36 @@
-#include <digisim/connection-list.h>
+#include <digisim/node-list.h>
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-void di_connection_list_init(DiConnectionList *list) {
+void di_node_list_init(DiNodeList *list) {
     list->count = 0;
     list->capacity = DI_CONNECTION_LIST_SMALL_SIZE;
     list->heap_alloc = false;
 }
 
-void di_connection_list_destroy(DiConnectionList *list) {
+void di_node_list_destroy(DiNodeList *list) {
     if (list->heap_alloc) {
         free(list->heap);
     }
 }
 
-void di_connection_list_alloc(DiConnectionList *list, size_t new_capacity) {
+void di_connection_list_alloc(DiNodeList *list, size_t new_capacity) {
     list->capacity = new_capacity;
 
     if (list->heap_alloc) {
-        list->heap = realloc(list->heap, list->capacity * sizeof(DiWire *));
+        list->heap = realloc(list->heap, list->capacity * sizeof(DiNode *));
     } else {
         list->heap_alloc = true;
-        DiWire **wires = malloc(list->capacity * sizeof(DiWire *));
-        memcpy(wires, list->local, list->count * sizeof(DiWire *));
+        DiNode **wires = malloc(list->capacity * sizeof(DiNode *));
+        memcpy(wires, list->local, list->count * sizeof(DiNode *));
 
         list->heap = wires;
     }
 }
 
-bool di_connection_list_add(DiConnectionList *list, DiWire *value) {
+bool di_node_list_add(DiNodeList *list, DiNode *value) {
     if (list->count >= list->capacity) {
         size_t new_capacity = list->capacity * 2;
 
@@ -41,7 +41,7 @@ bool di_connection_list_add(DiConnectionList *list, DiWire *value) {
         di_connection_list_alloc(list, new_capacity);
     }
 
-    DiWire **values = di_connection_list_values(list);
+    DiNode **values = di_node_list_values(list);
 
     for (size_t a = 0; a < list->count; a++) {
         if (values[a] == value) {
@@ -57,8 +57,8 @@ bool di_connection_list_add(DiConnectionList *list, DiWire *value) {
     return true;
 }
 
-bool di_connection_list_remove(DiConnectionList *list, DiWire *value) {
-    DiWire **values = di_connection_list_values(list);
+bool di_node_list_remove(DiNodeList *list, DiNode *value) {
+    DiNode **values = di_node_list_values(list);
 
     size_t index = 0;
 
@@ -81,7 +81,7 @@ bool di_connection_list_remove(DiConnectionList *list, DiWire *value) {
     return true;
 }
 
-DiWire **di_connection_list_values(DiConnectionList *list) {
+DiNode **di_node_list_values(DiNodeList *list) {
     if (list->heap_alloc) {
         return list->heap;
     } else {

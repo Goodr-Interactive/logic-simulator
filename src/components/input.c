@@ -1,25 +1,25 @@
-#include <digisim/components/input.h>
+#include <digisim/elements/input.h>
 
 void di_input_init(DiInput *input, size_t bits) {
-    DiComponent component = {
+    DiElement component = {
         .retain = NULL,
         .release = NULL,
         .changed = NULL,
     };
 
-    di_component_init(&component);
-    input->component = component;
+    di_element_init(&component);
+    input->element = component;
 
     input->bits = bits;
 
     di_signal_init(&input->signal, bits);
     di_signal_fill(&input->signal, DI_BIT_LOW); // explicit
 
-    di_connection_init(&input->output, &input->component, bits);
+    di_terminal_init(&input->output, &input->element, bits);
 }
 
 void di_input_destroy(DiInput *input) {
-    di_component_destroy(&input->component);
+    di_element_destroy(&input->element);
 
     di_signal_destroy(&input->signal);
 }
@@ -32,7 +32,7 @@ void di_input_emit(DiInput *input) {
     DiSignal copy;
     di_signal_init_from(&copy, &input->signal);
 
-    di_connection_write(&input->output, copy);
+    di_terminal_write(&input->output, copy);
 }
 
 void di_input_set_bit(DiInput *input, size_t index, DiBit bit) {

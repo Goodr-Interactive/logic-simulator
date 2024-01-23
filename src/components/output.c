@@ -1,9 +1,9 @@
-#include <digisim/components/output.h>
+#include <digisim/elements/output.h>
 
-void di_output_changed(DiComponent *component) {
+void di_output_changed(DiElement *component) {
     DiOutput *output = (DiOutput *)component;
 
-    DiSignal *signal = di_connection_read(&output->input);
+    DiSignal *signal = di_terminal_read(&output->input);
 
     if (!signal) {
         di_signal_fill(&output->signal, DI_BIT_ERROR);
@@ -17,25 +17,25 @@ void di_output_changed(DiComponent *component) {
 }
 
 void di_output_init(DiOutput *input, size_t bits) {
-    DiComponent component = {
+    DiElement component = {
         .retain = NULL,
         .release = NULL,
         .changed = di_output_changed,
     };
 
-    di_component_init(&component);
-    input->component = component;
+    di_element_init(&component);
+    input->element = component;
 
     input->bits = bits;
 
     di_signal_init(&input->signal, bits);
     di_signal_fill(&input->signal, DI_BIT_LOW); // explicit
 
-    di_connection_init(&input->input, &input->component, bits);
+    di_terminal_init(&input->input, &input->element, bits);
 }
 
 void di_output_destroy(DiOutput *input) {
-    di_component_destroy(&input->component);
+    di_element_destroy(&input->element);
 
     di_signal_destroy(&input->signal);
 }

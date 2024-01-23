@@ -1,15 +1,15 @@
 #pragma once
 
-#include <digisim/component.h>
-#include <digisim/connection.h>
+#include <digisim/element.h>
+#include <digisim/terminal.h>
 
 typedef struct di_input_t {
-    DiComponent component;
+    DiElement element;
 
     size_t bits;
     DiSignal signal;
 
-    DiConnection output;
+    DiTerminal output;
 } DiInput;
 
 void di_input_init(DiInput *input, size_t bits);

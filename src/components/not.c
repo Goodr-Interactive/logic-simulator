@@ -1,14 +1,14 @@
-#include <digisim/components/not.h>
+#include <digisim/elements/not.h>
 
-#include <digisim/wire.h>
+#include <digisim/node.h>
 
-void di_not_changed(DiComponent *component) {
+void di_not_changed(DiElement *component) {
     DiNot *self = (DiNot *)component;
 
-    DiSignal *signal = di_connection_read(&self->input);
+    DiSignal *signal = di_terminal_read(&self->input);
 
     if (!signal) {
-        di_connection_reset(&self->output);
+        di_terminal_reset(&self->output);
 
         return;
     }
@@ -22,25 +22,25 @@ void di_not_changed(DiComponent *component) {
         di_signal_set(&output, a, di_bit_logical(!value));
     }
 
-    di_connection_write(&self->output, output);
+    di_terminal_write(&self->output, output);
 }
 
 void di_not_init(DiNot *self, size_t bits) {
-    DiComponent component = {
+    DiElement component = {
         .retain = NULL,
         .release = NULL,
         .changed = di_not_changed
     };
 
-    di_component_init(&component);
+    di_element_init(&component);
 
-    self->component = component;
+    self->element = component;
     self->bits = bits;
 
-    di_connection_init(&self->input, &self->component, bits);
-    di_connection_init(&self->output, &self->component, bits);
+    di_terminal_init(&self->input, &self->element, bits);
+    di_terminal_init(&self->output, &self->element, bits);
 }
 
 void di_not_destroy(DiNot *self) {
-    di_component_destroy(&self->component);
+    di_element_destroy(&self->element);
 }
