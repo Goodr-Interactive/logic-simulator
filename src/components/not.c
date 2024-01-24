@@ -26,15 +26,9 @@ void di_not_changed(DiElement *component) {
 }
 
 void di_not_init(DiNot *self, size_t bits) {
-    DiElement component = {
-        .retain = NULL,
-        .release = NULL,
-        .changed = di_not_changed
-    };
+    di_element_init(&self->element);
 
-    di_element_init(&component);
-
-    self->element = component;
+    self->element.changed = di_not_changed;
     self->bits = bits;
 
     di_terminal_init(&self->input, &self->element, bits);

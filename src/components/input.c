@@ -1,14 +1,9 @@
 #include <digisim/elements/input.h>
 
 void di_input_init(DiInput *input, size_t bits) {
-    DiElement component = {
-        .retain = NULL,
-        .release = NULL,
-        .changed = NULL,
-    };
+    di_element_init(&input->element);
 
-    di_element_init(&component);
-    input->element = component;
+    input->element.changed = NULL;
 
     input->bits = bits;
 

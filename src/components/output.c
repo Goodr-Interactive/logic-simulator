@@ -16,30 +16,25 @@ void di_output_changed(DiElement *component) {
     di_signal_copy(&output->signal, signal);
 }
 
-void di_output_init(DiOutput *input, size_t bits) {
-    DiElement component = {
-        .retain = NULL,
-        .release = NULL,
-        .changed = di_output_changed,
-    };
+void di_output_init(DiOutput *output, size_t bits) {
+    di_element_init(&output->element);
 
-    di_element_init(&component);
-    input->element = component;
+    output->element.changed = di_output_changed;
 
-    input->bits = bits;
+    output->bits = bits;
 
-    di_signal_init(&input->signal, bits);
-    di_signal_fill(&input->signal, DI_BIT_LOW); // explicit
+    di_signal_init(&output->signal, bits);
+    di_signal_fill(&output->signal, DI_BIT_LOW); // explicit
 
-    di_terminal_init(&input->input, &input->element, bits);
+    di_terminal_init(&output->input, &output->element, bits);
 }
 
-void di_output_destroy(DiOutput *input) {
-    di_element_destroy(&input->element);
+void di_output_destroy(DiOutput *output) {
+    di_element_destroy(&output->element);
 
-    di_signal_destroy(&input->signal);
+    di_signal_destroy(&output->signal);
 }
 
-DiBit do_output_get_bit(DiOutput *input, size_t index) {
-    return di_signal_get(&input->signal, index);
+DiBit do_output_get_bit(DiOutput *output, size_t index) {
+    return di_signal_get(&output->signal, index);
 }

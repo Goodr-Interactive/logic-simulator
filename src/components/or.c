@@ -28,15 +28,10 @@ void di_or_changed(DiElement *component) {
 }
 
 void di_or_init(DiOr *self, size_t bits) {
-    DiElement component = {
-        .retain = NULL,
-        .release = NULL,
-        .changed = di_or_changed
-    };
+    di_element_init(&self->element);
 
-    di_element_init(&component);
+    self->element.changed = di_or_changed;
 
-    self->element = component;
     self->bits = bits;
 
     di_terminal_init(&self->input_a, &self->element, bits);
