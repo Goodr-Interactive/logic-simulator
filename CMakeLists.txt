@@ -29,6 +29,8 @@ add_library(digisim STATIC
     src/components/input.c
     src/components/not.c
     src/components/output.c
+    include/digisim/simulation.h
+    src/simulation.c
 )
 
 target_include_directories(digisim PUBLIC include)
