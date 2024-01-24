@@ -3,7 +3,7 @@
 #include <digisim/node.h>
 
 void di_or_changed(DiElement *component) {
-    DiOr *self = (DiOr *) component;
+    DiOr *self = (DiOr *)component;
 
     DiSignal *in_a = di_terminal_read(&self->input_a);
     DiSignal *in_b = di_terminal_read(&self->input_b);
@@ -40,6 +40,4 @@ void di_or_init(DiOr *self, size_t bits) {
     di_terminal_init(&self->output, &self->element, bits);
 }
 
-void di_or_destroy(DiOr *self) {
-    di_element_destroy(&self->element);
-}
+void di_or_destroy(DiOr *self) { di_element_destroy(&self->element); }

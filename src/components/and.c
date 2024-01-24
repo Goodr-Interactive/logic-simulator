@@ -3,7 +3,7 @@
 #include <digisim/node.h>
 
 void di_and_changed(DiElement *component) {
-    DiAnd *self = (DiAnd *) component;
+    DiAnd *self = (DiAnd *)component;
 
     DiSignal *in_a = di_terminal_read(&self->input_a);
     DiSignal *in_b = di_terminal_read(&self->input_b);
@@ -29,10 +29,7 @@ void di_and_changed(DiElement *component) {
 
 void di_and_init(DiAnd *self, size_t bits) {
     DiElement component = {
-        .retain = NULL,
-        .release = NULL,
-        .changed = di_and_changed
-    };
+        .retain = NULL, .release = NULL, .changed = di_and_changed};
 
     di_element_init(&component);
 
@@ -45,6 +42,4 @@ void di_and_init(DiAnd *self, size_t bits) {
     di_terminal_init(&self->output, &self->element, bits);
 }
 
-void di_and_destroy(DiAnd *self) {
-    di_element_destroy(&self->element);
-}
+void di_and_destroy(DiAnd *self) { di_element_destroy(&self->element); }

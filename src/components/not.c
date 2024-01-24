@@ -35,6 +35,4 @@ void di_not_init(DiNot *self, size_t bits) {
     di_terminal_init(&self->output, &self->element, bits);
 }
 
-void di_not_destroy(DiNot *self) {
-    di_element_destroy(&self->element);
-}
+void di_not_destroy(DiNot *self) { di_element_destroy(&self->element); }

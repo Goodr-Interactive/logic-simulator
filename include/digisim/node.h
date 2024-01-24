@@ -2,8 +2,8 @@
 
 #include <digisim/signal.h>
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #define DI_NODE_CONNECTIONS_SMALL_SIZE 4
 

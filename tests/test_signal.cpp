@@ -45,7 +45,9 @@ TEST_CASE("Signal Copy (413 Bit)") {
 
     di_signal_init(&signal, 413);
 
-    auto expected = [](size_t a) { return a % 2 == 0 ? DI_BIT_UNKNOWN : DI_BIT_HIGH; };
+    auto expected = [](size_t a) {
+        return a % 2 == 0 ? DI_BIT_UNKNOWN : DI_BIT_HIGH;
+    };
 
     for (size_t a = 0; a < signal.bits; a++) {
         REQUIRE(di_signal_get(&signal, a) == DI_BIT_LOW);

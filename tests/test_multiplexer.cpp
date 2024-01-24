@@ -1,9 +1,9 @@
 #include <catch2/catch_all.hpp>
 
 extern "C" {
-#include <digisim/node.h>
 #include <digisim/element.h>
 #include <digisim/elements/all.h>
+#include <digisim/node.h>
 }
 
 TEST_CASE("Test Multiplexer Creation") {

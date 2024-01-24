@@ -43,7 +43,8 @@ bool di_simulation_flush(DiSimulation *simulation, size_t max_step) {
 }
 
 void di_simulation_alloc(DiSimulation *simulation, size_t capacity) {
-    // Not using realloc here as I feel that I would have to use memmove (which could potentially alloc anyway).
+    // Not using realloc here as I feel that I would have to use memmove (which
+    // could potentially alloc anyway).
 
     if (capacity < simulation->capacity) {
         return;
@@ -57,14 +58,16 @@ void di_simulation_alloc(DiSimulation *simulation, size_t capacity) {
         start_count = simulation->count;
     }
 
-    memcpy(new_buffer, simulation->buffer + simulation->start, start_count * sizeof(DiNode *));
+    memcpy(new_buffer, simulation->buffer + simulation->start,
+           start_count * sizeof(DiNode *));
 
     if (start_count < simulation->count) {
         // copy second half
 
         size_t remaining_count = simulation->count - start_count;
 
-        memcpy(new_buffer + start_count, simulation->buffer, remaining_count * sizeof(DiNode *));
+        memcpy(new_buffer + start_count, simulation->buffer,
+               remaining_count * sizeof(DiNode *));
     }
 
     free(simulation->buffer);

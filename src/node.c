@@ -18,12 +18,15 @@ void di_wire_connections_alloc(DiNodeConnections *list, size_t new_capacity) {
     list->capacity = new_capacity;
 
     if (list->heap_alloc) {
-        list->heap = realloc(list->heap, list->capacity * sizeof(DiNodeConnection));
+        list->heap =
+            realloc(list->heap, list->capacity * sizeof(DiNodeConnection));
     } else {
         list->heap_alloc = true;
 
-        DiNodeConnection *connections = malloc(list->capacity * sizeof(DiNodeConnection));
-        memcpy(connections, list->local, list->count * sizeof(DiNodeConnection));
+        DiNodeConnection *connections =
+            malloc(list->capacity * sizeof(DiNodeConnection));
+        memcpy(connections, list->local,
+               list->count * sizeof(DiNodeConnection));
 
         list->heap = connections;
     }
@@ -90,7 +93,8 @@ bool di_wire_connections_remove(DiNodeConnections *list, DiTerminal *value) {
 }
 
 // Consider return value as temporary.
-DiNodeConnection *di_wire_connections_find(DiNodeConnections *list, DiTerminal *connection) {
+DiNodeConnection *di_wire_connections_find(DiNodeConnections *list,
+                                           DiTerminal *connection) {
     DiNodeConnection *values = di_wire_connections_values(list);
 
     for (size_t a = 0; a < list->count; a++) {
@@ -162,7 +166,8 @@ void di_wire_changed(DiNode *wire) {
 }
 
 void di_node_set(DiNode *wire, DiTerminal *source, DiSignal move_signal) {
-    DiNodeConnection *connection = di_wire_connections_find(&wire->connections, source);
+    DiNodeConnection *connection =
+        di_wire_connections_find(&wire->connections, source);
 
     if (!connection) {
         return;
@@ -175,7 +180,8 @@ void di_node_set(DiNode *wire, DiTerminal *source, DiSignal move_signal) {
 }
 
 void di_node_reset(DiNode *wire, DiTerminal *source) {
-    DiNodeConnection *connection = di_wire_connections_find(&wire->connections, source);
+    DiNodeConnection *connection =
+        di_wire_connections_find(&wire->connections, source);
 
     if (!connection) {
         return;

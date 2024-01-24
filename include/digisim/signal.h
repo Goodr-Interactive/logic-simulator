@@ -1,8 +1,8 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #define DI_BIT_REPRESENTATION_SIZE 2
 #define DI_BIT_REPRESENTATION_MASK 0b11
