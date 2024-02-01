@@ -35,7 +35,7 @@ typedef struct di_node_t {
 void di_node_init(DiNode *node);
 void di_node_destroy(DiNode *node);
 
-void di_node_changed(DiNode *node, DiSimulation *simulation); // Reads terminal values and sets node->hold
+void di_node_changed(DiNode *node, DiSimulation *simulation);   // Reads terminal values and sets node->hold
 void di_node_propagate(DiNode *node, DiSimulation *simulation); // Sends node->hold to all other connections
 
 void di_connect(DiNode *node, DiTerminal *terminal);

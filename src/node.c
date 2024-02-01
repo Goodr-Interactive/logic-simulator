@@ -1,8 +1,8 @@
 #include <digisim/node.h>
 
 #include <digisim/element.h>
-#include <digisim/terminal.h>
 #include <digisim/simulation.h>
+#include <digisim/terminal.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -220,10 +220,6 @@ void di_disconnect_simulate(DiNode *node, DiTerminal *connection, DiSimulation *
     di_node_changed(node, simulation);
 }
 
-void di_connect(DiNode *node, DiTerminal *connection) {
-    di_connect_simulate(node, connection, NULL);
-}
+void di_connect(DiNode *node, DiTerminal *connection) { di_connect_simulate(node, connection, NULL); }
 
-void di_disconnect(DiNode *node, DiTerminal *connection) {
-    di_disconnect_simulate(node, connection, NULL);
-}
+void di_disconnect(DiNode *node, DiTerminal *connection) { di_disconnect_simulate(node, connection, NULL); }

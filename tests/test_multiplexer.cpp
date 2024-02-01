@@ -8,22 +8,22 @@ extern "C" {
 }
 
 struct Multiplexer {
-    DiInput a { };
-    DiInput b { };
-    DiInput c { };
-    DiAnd and1 { };
-    DiAnd and2 { };
-    DiOr sum { };
-    DiNot flip { };
-    DiOutput f { };
+    DiInput a{};
+    DiInput b{};
+    DiInput c{};
+    DiAnd and1{};
+    DiAnd and2{};
+    DiOr sum{};
+    DiNot flip{};
+    DiOutput f{};
 
-    DiNode aToAnd1 { };
-    DiNode cToAnd2 { };
-    DiNode bToGates { };
-    DiNode flipToAnd2 { };
-    DiNode and1ToSum { };
-    DiNode and2ToSum { };
-    DiNode sumToF { };
+    DiNode aToAnd1{};
+    DiNode cToAnd2{};
+    DiNode bToGates{};
+    DiNode flipToAnd2{};
+    DiNode and1ToSum{};
+    DiNode and2ToSum{};
+    DiNode sumToF{};
 
     void connect() {
         di_connect(&aToAnd1, &a.output);
@@ -97,9 +97,7 @@ struct Multiplexer {
     }
 };
 
-TEST_CASE("Test Multiplexer Creation") {
-    Multiplexer multiplexer;
-}
+TEST_CASE("Test Multiplexer Creation") { Multiplexer multiplexer; }
 
 TEST_CASE("Test Multiplexer Step Low") {
     Multiplexer multiplexer;
@@ -195,4 +193,3 @@ TEST_CASE("Test Multiplexer Output Y Ignore X") {
     REQUIRE(testMultiplexer(DI_BIT_HIGH, DI_BIT_LOW, DI_BIT_HIGH) == DI_BIT_LOW);
     REQUIRE(testMultiplexer(DI_BIT_HIGH, DI_BIT_HIGH, DI_BIT_HIGH) == DI_BIT_HIGH);
 }
-

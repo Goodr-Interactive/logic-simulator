@@ -123,7 +123,8 @@ void testUnaryGate(DiTerminal *input, DiTerminal *output, DiBit inputValue, DiBi
     REQUIRE(gate.simulate(inputValue) == expected);
 }
 
-void testBinaryGate(DiTerminal *first, DiTerminal *second, DiTerminal *output, DiBit firstValue, DiBit secondValue, DiBit expected) {
+void testBinaryGate(DiTerminal *first, DiTerminal *second, DiTerminal *output, DiBit firstValue, DiBit secondValue,
+                    DiBit expected) {
     BinaryGate gate(first, second, output);
 
     REQUIRE(gate.simulate(firstValue, secondValue) == expected);
@@ -134,9 +135,7 @@ TEST_CASE("Test AND Gate Low") {
 
     di_and_init(&gate, 1);
 
-    testBinaryGate(
-        &gate.input_a, &gate.input_b, &gate.output,
-        DI_BIT_LOW, DI_BIT_LOW, DI_BIT_LOW);
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_LOW, DI_BIT_LOW, DI_BIT_LOW);
 
     di_and_destroy(&gate);
 }
@@ -146,9 +145,7 @@ TEST_CASE("Test AND Gate Left High") {
 
     di_and_init(&gate, 1);
 
-    testBinaryGate(
-        &gate.input_a, &gate.input_b, &gate.output,
-        DI_BIT_HIGH, DI_BIT_LOW, DI_BIT_LOW);
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_HIGH, DI_BIT_LOW, DI_BIT_LOW);
 
     di_and_destroy(&gate);
 }
@@ -158,9 +155,7 @@ TEST_CASE("Test AND Right High") {
 
     di_and_init(&gate, 1);
 
-    testBinaryGate(
-        &gate.input_a, &gate.input_b, &gate.output,
-        DI_BIT_LOW, DI_BIT_HIGH, DI_BIT_LOW);
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_LOW, DI_BIT_HIGH, DI_BIT_LOW);
 
     di_and_destroy(&gate);
 }
@@ -170,9 +165,7 @@ TEST_CASE("Test AND Gate High") {
 
     di_and_init(&gate, 1);
 
-    testBinaryGate(
-        &gate.input_a, &gate.input_b, &gate.output,
-        DI_BIT_HIGH, DI_BIT_HIGH, DI_BIT_HIGH);
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_HIGH, DI_BIT_HIGH, DI_BIT_HIGH);
 
     di_and_destroy(&gate);
 }
@@ -182,9 +175,7 @@ TEST_CASE("Test OR Gate Low") {
 
     di_or_init(&gate, 1);
 
-    testBinaryGate(
-        &gate.input_a, &gate.input_b, &gate.output,
-        DI_BIT_LOW, DI_BIT_LOW, DI_BIT_LOW);
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_LOW, DI_BIT_LOW, DI_BIT_LOW);
 
     di_or_destroy(&gate);
 }
@@ -194,9 +185,7 @@ TEST_CASE("Test OR Gate Left High") {
 
     di_or_init(&gate, 1);
 
-    testBinaryGate(
-        &gate.input_a, &gate.input_b, &gate.output,
-        DI_BIT_HIGH, DI_BIT_LOW, DI_BIT_HIGH);
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_HIGH, DI_BIT_LOW, DI_BIT_HIGH);
 
     di_or_destroy(&gate);
 }
@@ -206,9 +195,7 @@ TEST_CASE("Test OR Gate Right High") {
 
     di_or_init(&gate, 1);
 
-    testBinaryGate(
-        &gate.input_a, &gate.input_b, &gate.output,
-        DI_BIT_LOW, DI_BIT_HIGH, DI_BIT_HIGH);
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_LOW, DI_BIT_HIGH, DI_BIT_HIGH);
 
     di_or_destroy(&gate);
 }
@@ -218,9 +205,7 @@ TEST_CASE("Test OR Gate High") {
 
     di_or_init(&gate, 1);
 
-    testBinaryGate(
-        &gate.input_a, &gate.input_b, &gate.output,
-        DI_BIT_HIGH, DI_BIT_HIGH, DI_BIT_HIGH);
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_HIGH, DI_BIT_HIGH, DI_BIT_HIGH);
 
     di_or_destroy(&gate);
 }
