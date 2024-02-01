@@ -1,12 +1,14 @@
 #include <digisim/node.h>
 
+#include <digisim/element.h>
 #include <digisim/terminal.h>
+#include <digisim/simulation.h>
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-DiNodeConnection *di_wire_connections_values(DiNodeConnections *list) {
+DiTerminal **di_node_connections_values(DiNodeConnections *list) {
     if (list->heap_alloc) {
         return list->heap;
     } else {
@@ -14,25 +16,116 @@ DiNodeConnection *di_wire_connections_values(DiNodeConnections *list) {
     }
 }
 
-void di_wire_connections_alloc(DiNodeConnections *list, size_t new_capacity) {
+void di_node_connections_alloc(DiNodeConnections *list, size_t new_capacity) {
     list->capacity = new_capacity;
 
     if (list->heap_alloc) {
-        list->heap =
-            realloc(list->heap, list->capacity * sizeof(DiNodeConnection));
+        list->heap = realloc(list->heap, list->capacity * sizeof(DiTerminal *));
     } else {
         list->heap_alloc = true;
 
-        DiNodeConnection *connections =
-            malloc(list->capacity * sizeof(DiNodeConnection));
-        memcpy(connections, list->local,
-               list->count * sizeof(DiNodeConnection));
+        DiTerminal **connections = malloc(list->capacity * sizeof(DiTerminal *));
+        memcpy(connections, list->local, list->count * sizeof(DiTerminal *));
 
         list->heap = connections;
     }
 }
 
-bool di_wire_connections_add(DiNodeConnections *list, DiTerminal *value) {
+void di_node_changed(DiNode *node, DiSimulation *simulation) {
+    node->hold = NULL;
+
+    DiTerminal **values = di_node_connections_values(&node->connections);
+
+    size_t bits = 0;
+
+    bool failed = false;
+    DiTerminal *hold = NULL;
+
+    for (size_t a = 0; a < node->connections.count; a++) {
+        if (bits == 0) {
+            bits = values[a]->bits;
+        }
+
+        assert(values[a]->bits == bits);
+
+        if (values[a]->holding) {
+            if (hold) {
+                failed = true;
+                break;
+            } else {
+                hold = values[a];
+            }
+        }
+    }
+
+    // Becomes error, clear signal and re-simulate.
+    if (failed) {
+        if (node->has_signal) {
+            di_signal_destroy(&node->signal);
+        }
+
+        // Changed.
+        if (!node->error) {
+            di_simulation_add(simulation, node);
+        }
+
+        node->error = true;
+        node->hold = NULL;
+        node->has_signal = false;
+
+        return;
+    }
+
+    // assert !failed
+
+    node->hold = hold;
+    node->error = false;
+
+    bool re_simulate = false;
+
+    if (hold) {
+        // By selection.
+        assert(hold->holding);
+
+        re_simulate = !node->has_signal;
+
+        if (node->has_signal) {
+            re_simulate = re_simulate || !di_signal_equal(&node->signal, &hold->signal);
+
+            di_signal_destroy(&node->signal);
+        }
+
+        node->has_signal = true;
+        di_signal_init_from(&node->signal, &hold->signal);
+    } else {
+        if (node->has_signal) {
+            di_signal_destroy(&node->signal);
+
+            re_simulate = true;
+        }
+
+        node->has_signal = false;
+    }
+
+    if (re_simulate) {
+        di_simulation_add(simulation, node);
+    }
+}
+
+void di_node_propagate(DiNode *node, DiSimulation *simulation) {
+    DiTerminal **values = di_node_connections_values(&node->connections);
+
+    for (size_t a = 0; a < node->connections.count; a++) {
+        // Ignore holding connection (we don't need to send it back!)
+        if (values[a] == node->hold) {
+            continue;
+        }
+
+        di_element_changed(values[a]->parent, simulation);
+    }
+}
+
+bool di_node_connections_add(DiNodeConnections *list, DiTerminal *value) {
     if (list->count >= list->capacity) {
         size_t new_capacity = 2 * list->capacity;
 
@@ -40,47 +133,38 @@ bool di_wire_connections_add(DiNodeConnections *list, DiTerminal *value) {
             new_capacity = list->count + 1;
         }
 
-        di_wire_connections_alloc(list, new_capacity);
+        di_node_connections_alloc(list, new_capacity);
     }
 
-    DiNodeConnection *values = di_wire_connections_values(list);
+    DiTerminal **values = di_node_connections_values(list);
 
     for (size_t a = 0; a < list->count; a++) {
-        if (values[a].terminal == value) {
+        if (values[a] == value) {
             return false;
         }
     }
 
     assert(list->count < list->capacity);
 
-    DiNodeConnection connection = {
-        .terminal = value,
-        .holding = false,
-    };
-
-    values[list->count] = connection;
+    values[list->count] = value;
     list->count++;
 
     return true;
 }
 
-bool di_wire_connections_remove(DiNodeConnections *list, DiTerminal *value) {
+bool di_node_connections_remove(DiNodeConnections *list, DiTerminal *value) {
     size_t index = 0;
 
-    DiNodeConnection *values = di_wire_connections_values(list);
+    DiTerminal **values = di_node_connections_values(list);
 
     for (; index < list->count; index++) {
-        if (values[index].terminal == value) {
+        if (values[index] == value) {
             break;
         }
     }
 
     if (index >= list->count) {
         return false;
-    }
-
-    if (values[index].holding) {
-        di_signal_destroy(&values[index].signal);
     }
 
     for (; index < list->count; index++) {
@@ -92,36 +176,18 @@ bool di_wire_connections_remove(DiNodeConnections *list, DiTerminal *value) {
     return true;
 }
 
-// Consider return value as temporary.
-DiNodeConnection *di_wire_connections_find(DiNodeConnections *list,
-                                           DiTerminal *connection) {
-    DiNodeConnection *values = di_wire_connections_values(list);
-
-    for (size_t a = 0; a < list->count; a++) {
-        if (values[a].terminal == connection) {
-            return &values[a];
-        }
-    }
-
-    return NULL;
-}
-
-void di_wire_connections_init(DiNodeConnections *list) {
+void di_node_connections_init(DiNodeConnections *list) {
     list->count = 0;
     list->capacity = DI_NODE_CONNECTIONS_SMALL_SIZE;
 
     list->heap_alloc = false;
 }
 
-void di_wire_connections_destroy(DiNodeConnections *list) {
-    DiNodeConnection *values = di_wire_connections_values(list);
+void di_node_connections_destroy(DiNodeConnections *list) {
+    DiTerminal **values = di_node_connections_values(list);
 
     for (size_t a = 0; a < list->count; a++) {
-        values[a].terminal->node = NULL;
-
-        if (values[a].holding) {
-            di_signal_destroy(&values[a].signal);
-        }
+        values[a]->node = NULL;
     }
 
     if (list->heap_alloc) {
@@ -129,85 +195,35 @@ void di_wire_connections_destroy(DiNodeConnections *list) {
     }
 }
 
-void di_node_init(DiNode *wire) {
-    wire->hold = NULL;
+void di_node_init(DiNode *node) {
+    node->hold = NULL;
 
-    di_wire_connections_init(&wire->connections);
+    memset(&node->signal, 0, sizeof(DiSignal));
+    di_node_connections_init(&node->connections);
 }
 
-void di_node_destroy(DiNode *wire) {
-    di_wire_connections_destroy(&wire->connections);
+void di_node_destroy(DiNode *node) { di_node_connections_destroy(&node->connections); }
+
+void di_connect_simulate(DiNode *node, DiTerminal *connection, DiSimulation *simulation) {
+    assert(!connection->node || connection->node == node);
+
+    connection->node = node;
+    di_node_connections_add(&node->connections, connection);
+
+    di_node_changed(node, simulation);
 }
 
-void di_wire_changed(DiNode *wire) {
-    wire->hold = NULL;
-
-    DiNodeConnection *values = di_wire_connections_values(&wire->connections);
-
-    size_t bits = 0;
-
-    bool failed = false;
-
-    for (size_t a = 0; a < wire->connections.count; a++) {
-        if (bits == 0) {
-            bits = values[a].terminal->bits;
-        }
-
-        assert(values[a].terminal->bits == bits);
-
-        if (!failed && values[a].holding) {
-            if (wire->hold) {
-                failed = true;
-            } else {
-                wire->hold = &values[a];
-            }
-        }
-    }
-}
-
-void di_node_set(DiNode *wire, DiTerminal *source, DiSignal move_signal) {
-    DiNodeConnection *connection =
-        di_wire_connections_find(&wire->connections, source);
-
-    if (!connection) {
-        return;
-    }
-
-    connection->holding = true;
-    connection->signal = move_signal;
-
-    di_wire_changed(wire);
-}
-
-void di_node_reset(DiNode *wire, DiTerminal *source) {
-    DiNodeConnection *connection =
-        di_wire_connections_find(&wire->connections, source);
-
-    if (!connection) {
-        return;
-    }
-
-    if (connection->holding) {
-        di_signal_destroy(&connection->signal);
-    }
-
-    connection->holding = false;
-
-    di_wire_changed(wire);
-}
-
-void di_connect(DiNode *wire, DiTerminal *connection) {
-    di_wire_connections_add(&wire->connections, connection);
-
-    // Super important, hold can be freed by adding a connection.
-    di_wire_changed(wire);
-}
-
-void di_disconnect(DiNode *wire, DiTerminal *connection) {
-    di_node_reset(wire, connection);
-
+void di_disconnect_simulate(DiNode *node, DiTerminal *connection, DiSimulation *simulation) {
     connection->node = NULL;
-    di_wire_connections_remove(&wire->connections, connection);
+    di_node_connections_remove(&node->connections, connection);
 
-    di_wire_changed(wire);
+    di_node_changed(node, simulation);
+}
+
+void di_connect(DiNode *node, DiTerminal *connection) {
+    di_connect_simulate(node, connection, NULL);
+}
+
+void di_disconnect(DiNode *node, DiTerminal *connection) {
+    di_disconnect_simulate(node, connection, NULL);
 }

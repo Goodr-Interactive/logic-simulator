@@ -2,9 +2,9 @@
 
 #include <string.h>
 
-void di_element_changed(DiElement *element) {
+void di_element_changed(DiElement *element, DiSimulation *simulation) {
     if (element->changed) {
-        element->changed(element);
+        element->changed(element, simulation);
     }
 }
 
@@ -14,6 +14,4 @@ void di_element_init(DiElement *component) {
     di_node_list_init(&component->connections);
 }
 
-void di_element_destroy(DiElement *component) {
-    di_node_list_destroy(&component->connections);
-}
+void di_element_destroy(DiElement *component) { di_node_list_destroy(&component->connections); }

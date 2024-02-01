@@ -6,7 +6,7 @@ set(CMAKE_CPP_STANDARD 17)
 
 add_subdirectory(external)
 
-add_library(digisim STATIC
+add_library(digisim
     include/digisim/element.h
     include/digisim/node-list.h
     include/digisim/node.h
@@ -18,21 +18,23 @@ add_library(digisim STATIC
     include/digisim/terminal.h
     include/digisim/signal.h
     include/digisim/elements/not.h
+    include/digisim/simulation.h
 
     src/element.c
     src/node-list.c
     src/node.c
-    src/components/and.c
-    src/components/or.c
+    src/elements/and.c
+    src/elements/or.c
     src/terminal.c
     src/signal.c
-    src/components/input.c
-    src/components/not.c
-    src/components/output.c
-    include/digisim/simulation.h
+    src/elements/input.c
+    src/elements/not.c
+    src/elements/output.c
     src/simulation.c
 )
 
 target_include_directories(digisim PUBLIC include)
+
+install(TARGETS digisim)
 
 add_subdirectory(tests)

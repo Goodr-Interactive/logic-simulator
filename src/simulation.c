@@ -24,9 +24,9 @@ void di_simulation_step(DiSimulation *simulation) {
     size_t step_size = simulation->count;
 
     for (size_t a = 0; a < step_size; a++) {
-        DiNode *item = di_simulation_pop(simulation);
+        DiNode *node = di_simulation_pop(simulation);
 
-        // DiNode propagate
+        di_node_propagate(node, simulation);
     }
 }
 
@@ -58,16 +58,14 @@ void di_simulation_alloc(DiSimulation *simulation, size_t capacity) {
         start_count = simulation->count;
     }
 
-    memcpy(new_buffer, simulation->buffer + simulation->start,
-           start_count * sizeof(DiNode *));
+    memcpy(new_buffer, simulation->buffer + simulation->start, start_count * sizeof(DiNode *));
 
     if (start_count < simulation->count) {
         // copy second half
 
         size_t remaining_count = simulation->count - start_count;
 
-        memcpy(new_buffer + start_count, simulation->buffer,
-               remaining_count * sizeof(DiNode *));
+        memcpy(new_buffer + start_count, simulation->buffer, remaining_count * sizeof(DiNode *));
     }
 
     free(simulation->buffer);
@@ -78,6 +76,10 @@ void di_simulation_alloc(DiSimulation *simulation, size_t capacity) {
 }
 
 void di_simulation_add(DiSimulation *simulation, DiNode *node) {
+    if (!simulation) {
+        return;
+    }
+
     if (simulation->count >= simulation->capacity) {
         size_t new_capacity = simulation->capacity;
 
@@ -102,6 +104,4 @@ void di_simulation_init(DiSimulation *simulation) {
     simulation->buffer = malloc(simulation->capacity * sizeof(DiNode **));
 }
 
-void di_simulation_destroy(DiSimulation *simulation) {
-    free(simulation->buffer);
-}
+void di_simulation_destroy(DiSimulation *simulation) { free(simulation->buffer); }

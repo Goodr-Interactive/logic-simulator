@@ -1,5 +1,7 @@
 #include <digisim/elements/input.h>
 
+#include <digisim/simulation.h>
+
 void di_input_init(DiInput *input, size_t bits) {
     di_element_init(&input->element);
 
@@ -14,32 +16,32 @@ void di_input_init(DiInput *input, size_t bits) {
 }
 
 void di_input_destroy(DiInput *input) {
+    di_terminal_destroy(&input->output);
+
     di_element_destroy(&input->element);
 
     di_signal_destroy(&input->signal);
 }
 
-DiBit di_input_get_bit(DiInput *input, size_t index) {
-    return di_signal_get(&input->signal, index);
-}
-
-void di_input_emit(DiInput *input) {
+void di_input_emit(DiInput *input, DiSimulation *simulation) {
     DiSignal copy;
     di_signal_init_from(&copy, &input->signal);
 
-    di_terminal_write(&input->output, copy);
+    di_terminal_write(&input->output, copy, simulation);
 }
 
-void di_input_set_bit(DiInput *input, size_t index, DiBit bit) {
+DiBit di_input_get_bit(DiInput *input, size_t index) { return di_signal_get(&input->signal, index); }
+
+void di_input_set_bit(DiInput *input, size_t index, DiBit bit, DiSimulation *simulation) {
     di_signal_set(&input->signal, index, bit);
 
-    di_input_emit(input);
+    di_input_emit(input, simulation);
 }
 
-void di_input_set(DiInput *input, DiSignal move_signal) {
+void di_input_set(DiInput *input, DiSignal move_signal, DiSimulation *simulation) {
     di_signal_destroy(&input->signal);
 
     input->signal = move_signal;
 
-    di_input_emit(input);
+    di_input_emit(input, simulation);
 }

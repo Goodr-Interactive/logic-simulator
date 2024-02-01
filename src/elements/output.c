@@ -1,6 +1,6 @@
 #include <digisim/elements/output.h>
 
-void di_output_changed(DiElement *component) {
+void di_output_changed(DiElement *component, DiSimulation *simulation) {
     DiOutput *output = (DiOutput *)component;
 
     DiSignal *signal = di_terminal_read(&output->input);
@@ -30,11 +30,11 @@ void di_output_init(DiOutput *output, size_t bits) {
 }
 
 void di_output_destroy(DiOutput *output) {
+    di_terminal_destroy(&output->input);
+
     di_element_destroy(&output->element);
 
     di_signal_destroy(&output->signal);
 }
 
-DiBit do_output_get_bit(DiOutput *output, size_t index) {
-    return di_signal_get(&output->signal, index);
-}
+DiBit di_output_get_bit(DiOutput *output, size_t index) { return di_signal_get(&output->signal, index); }
