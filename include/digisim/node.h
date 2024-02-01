@@ -1,4 +1,10 @@
-#pragma once
+/**
+ * @file
+ * @brief Interface for Circuit Wires and Connections
+ */
+
+#ifndef DIGISIM_NODE_H
+#define DIGISIM_NODE_H
 
 #include <digisim/signal.h>
 
@@ -45,3 +51,5 @@ void di_disconnect(DiNode *node, DiTerminal *terminal);
 
 void di_connect_simulate(DiNode *node, DiTerminal *terminal, DiSimulation *simulation);
 void di_disconnect_simulate(DiNode *node, DiTerminal *terminal, DiSimulation *simulation);
+
+#endif // DIGISIM_NODE_H

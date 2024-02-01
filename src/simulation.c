@@ -2,10 +2,11 @@
 
 #include <digisim/node.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define DI_SIMULATION_DEFAULT_CAPACITY 32
+#define DI_SIMULATION_DEFAULT_CAPACITY 2
 
 DiNode *di_simulation_pop(DiSimulation *simulation) {
     if (simulation->count <= 0) {
@@ -14,7 +15,7 @@ DiNode *di_simulation_pop(DiSimulation *simulation) {
 
     DiNode *node = simulation->buffer[simulation->start];
 
-    simulation->start++;
+    simulation->start = (simulation->start + 1) % simulation->capacity;
     simulation->count--;
 
     return node;
@@ -24,6 +25,8 @@ void di_simulation_step(DiSimulation *simulation) {
     size_t step_size = simulation->count;
 
     for (size_t a = 0; a < step_size; a++) {
+        assert(simulation->count > 0);
+
         DiNode *node = di_simulation_pop(simulation);
 
         di_node_propagate(node, simulation);
@@ -81,7 +84,7 @@ void di_simulation_add(DiSimulation *simulation, DiNode *node) {
     }
 
     if (simulation->count >= simulation->capacity) {
-        size_t new_capacity = simulation->capacity;
+        size_t new_capacity = simulation->capacity * 2;
 
         if (new_capacity < simulation->count + 1) {
             new_capacity = simulation->count + 1;

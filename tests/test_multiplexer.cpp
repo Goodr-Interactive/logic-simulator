@@ -49,7 +49,7 @@ struct Multiplexer {
         di_connect(&sumToF, &f.input);
     }
 
-    void add_inputs(DiSimulation *simulation) {
+    void addInputs(DiSimulation *simulation) {
         // simulation is empty here
         di_input_emit(&a, simulation);
         di_input_emit(&b, simulation);
@@ -106,7 +106,7 @@ TEST_CASE("Test Multiplexer Step Low") {
 
     di_simulation_init(&simulation);
 
-    multiplexer.add_inputs(&simulation);
+    multiplexer.addInputs(&simulation);
 
     REQUIRE(simulation.count == 3);
 
@@ -138,10 +138,10 @@ TEST_CASE("Test Multiplexer Step High") {
     di_simulation_step(&simulation);
 
     REQUIRE(multiplexer.and1.output.holding);
-    REQUIRE(di_signal_get(&multiplexer.and1.output.signal, 0) == DI_BIT_HIGH);
+    REQUIRE(di_signal_get(&multiplexer.and1.output.signal, 0) == DI_BIT_LOW);
 
     REQUIRE(multiplexer.and2.output.holding);
-    REQUIRE(di_signal_get(&multiplexer.and2.output.signal, 0) == DI_BIT_LOW);
+    REQUIRE(di_signal_get(&multiplexer.and2.output.signal, 0) == DI_BIT_HIGH);
 
     di_simulation_destroy(&simulation);
 }

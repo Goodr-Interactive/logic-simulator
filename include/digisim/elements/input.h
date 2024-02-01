@@ -1,4 +1,10 @@
-#pragma once
+/**
+ * @file
+ * @brief Input Terminal Element and Connections
+ */
+
+#ifndef DIGISIM_ELEMENTS_INPUT_H
+#define DIGISIM_ELEMENTS_INPUT_H
 
 #include <digisim/element.h>
 #include <digisim/terminal.h>
@@ -20,3 +26,5 @@ void di_input_emit(DiInput *input, DiSimulation *simulation);
 DiBit di_input_get_bit(DiInput *input, size_t index);
 void di_input_set_bit(DiInput *input, size_t index, DiBit bit, DiSimulation *simulation);
 void di_input_set(DiInput *input, DiSignal move_signal, DiSimulation *simulation);
+
+#endif // DIGISIM_ELEMENTS_INPUT_H

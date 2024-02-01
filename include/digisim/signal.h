@@ -1,4 +1,10 @@
-#pragma once
+/**
+ * @file
+ * @brief Interface for Wire and Terminal Values
+ */
+
+#ifndef DIGISIM_SIGNAL_H
+#define DIGISIM_SIGNAL_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -41,3 +47,5 @@ uint64_t *di_signal_values(DiSignal *signal);
 void di_signal_init(DiSignal *signal, size_t bits);
 void di_signal_init_from(DiSignal *signal, DiSignal *source);
 void di_signal_destroy(DiSignal *signal);
+
+#endif // DIGISIM_SIGNAL_H

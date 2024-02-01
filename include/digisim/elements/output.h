@@ -1,4 +1,10 @@
-#pragma once
+/**
+ * @file
+ * @brief Output Terminal Element and Connections
+ */
+
+#ifndef DIGISIM_ELEMENTS_OUTPUT_H
+#define DIGISIM_ELEMENTS_OUTPUT_H
 
 #include <digisim/element.h>
 #include <digisim/terminal.h>
@@ -16,3 +22,5 @@ void di_output_init(DiOutput *input, size_t bits);
 void di_output_destroy(DiOutput *input);
 
 DiBit di_output_get_bit(DiOutput *input, size_t index);
+
+#endif // DIGISIM_ELEMENTS_OUTPUT_H

@@ -1,4 +1,10 @@
-#pragma once
+/**
+ * @file
+ * @brief Interface for Exposing Element Inputs/Outputs
+ */
+
+#ifndef DIGISIM_TERMINAL_H
+#define DIGISIM_TERMINAL_H
 
 #include <digisim/signal.h>
 
@@ -26,3 +32,5 @@ void di_terminal_write(DiTerminal *terminal, DiSignal move_signal, DiSimulation 
 void di_terminal_reset(DiTerminal *terminal, DiSimulation *simulation);
 
 DiSignal *di_terminal_read(DiTerminal *terminal);
+
+#endif // DIGISIM_TERMINAL_H

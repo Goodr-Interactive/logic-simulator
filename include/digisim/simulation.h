@@ -1,4 +1,10 @@
-#pragma once
+/**
+ * @file
+ * @brief Interface for Simulation and Propagation
+ */
+
+#ifndef DIGISIM_SIMULATION_H
+#define DIGISIM_SIMULATION_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -22,3 +28,5 @@ void di_simulation_add(DiSimulation *simulation, DiNode *node);
 
 void di_simulation_init(DiSimulation *simulation);
 void di_simulation_destroy(DiSimulation *simulation);
+
+#endif // DIGISIM_SIMULATION_H
