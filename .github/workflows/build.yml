@@ -16,3 +16,7 @@ jobs:
         working-directory: build
       - name: Build Project
         run: cmake --build build --target digisim
+      - name: Build Tests
+        run: cmake --build build --target digisim-tests
+      - name: Test Project
+        run: ./build/tests/digisim-tests
