@@ -15,4 +15,4 @@ jobs:
         run: cmake ..
         working-directory: build
       - name: Build Project
-        run: cmake --build build
+        run: cmake --build build --target digisim
