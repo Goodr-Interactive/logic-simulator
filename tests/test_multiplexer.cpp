@@ -159,7 +159,7 @@ DiBit testMultiplexer(DiBit x, DiBit y, DiBit s) {
 
     REQUIRE(simulation.count == 3);
 
-    di_simulation_flush(&simulation, 100);
+    di_simulation_run(&simulation, 100);
 
     DiBit value = di_signal_get(&multiplexer.f.signal, 0);
 

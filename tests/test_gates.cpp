@@ -4,15 +4,19 @@
 
 void testUnaryGate(DiTerminal *input, DiTerminal *output, DiBit inputValue, DiBit expected) {
     UnaryGate gate(input, output);
+    std::optional<DiBit> value = gate.simulate(inputValue);
 
-    REQUIRE(gate.simulate(inputValue) == expected);
+    REQUIRE(value.has_value());
+    REQUIRE(*value == expected);
 }
 
 void testBinaryGate(DiTerminal *first, DiTerminal *second, DiTerminal *output, DiBit firstValue, DiBit secondValue,
                     DiBit expected) {
     BinaryGate gate(first, second, output);
+    std::optional<DiBit> value = gate.simulate(firstValue, secondValue);
 
-    REQUIRE(gate.simulate(firstValue, secondValue) == expected);
+    REQUIRE(value.has_value());
+    REQUIRE(*value == expected);
 }
 
 TEST_CASE("Test AND Gate Low") {

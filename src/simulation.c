@@ -33,7 +33,7 @@ void di_simulation_step(DiSimulation *simulation) {
     }
 }
 
-bool di_simulation_flush(DiSimulation *simulation, size_t max_step) {
+bool di_simulation_run(DiSimulation *simulation, size_t max_step) {
     size_t step = 0;
 
     while (simulation->count > 0 && step < max_step) {

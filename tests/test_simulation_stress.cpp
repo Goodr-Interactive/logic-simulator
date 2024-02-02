@@ -40,7 +40,7 @@ void test_simulation(size_t times) {
         }
 
         if (!pop) {
-            bool dead = di_simulation_flush(&simulation, 10);
+            bool dead = di_simulation_run(&simulation, 10);
 
             REQUIRE(!dead);
         }

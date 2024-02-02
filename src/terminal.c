@@ -24,6 +24,8 @@ void di_terminal_destroy(DiTerminal *terminal) {
 }
 
 void di_terminal_write(DiTerminal *terminal, DiSignal move_signal, DiSimulation *simulation) {
+    assert(move_signal.bits == terminal->bits);
+
     if (terminal->holding) {
         di_signal_destroy(&terminal->signal);
     }
@@ -59,6 +61,7 @@ DiSignal *di_terminal_read(DiTerminal *terminal) {
     }
 
     assert(wire->holding);
+    assert(terminal->bits == wire->signal.bits);
 
     return &wire->signal;
 }

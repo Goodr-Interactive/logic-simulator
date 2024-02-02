@@ -38,5 +38,7 @@ add_subdirectory(tests)
 find_package(Doxygen)
 
 if (${DOXYGEN_FOUND})
+    set(DOXYGEN_TYPEDEF_HIDES_STRUCT YES)
+
     doxygen_add_docs(digisim-docs include src)
 endif()

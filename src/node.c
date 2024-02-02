@@ -209,13 +209,16 @@ void di_connect_simulate(DiNode *node, DiTerminal *connection, DiSimulation *sim
 
     connection->node = node;
     di_node_connections_add(&node->connections, connection);
+    di_node_list_add(&connection->parent->connections, node);
 
     di_node_changed(node, simulation);
 }
 
 void di_disconnect_simulate(DiNode *node, DiTerminal *connection, DiSimulation *simulation) {
     connection->node = NULL;
+
     di_node_connections_remove(&node->connections, connection);
+    di_node_list_remove(&connection->parent->connections, node);
 
     di_node_changed(node, simulation);
 }

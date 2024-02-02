@@ -21,7 +21,7 @@ std::optional<DiBit> UnaryGate::simulate(DiBit inputValue) {
 std::optional<DiBit> UnaryGate::simulate(DiSimulation *simulation, DiBit inputValue) {
     setInput(simulation, inputValue);
 
-    bool dead = di_simulation_flush(simulation, 10);
+    bool dead = di_simulation_run(simulation, 10);
 
     if (dead) {
         return std::nullopt;
@@ -72,7 +72,7 @@ std::optional<DiBit> BinaryGate::simulate(DiBit aValue, DiBit bValue) {
 std::optional<DiBit> BinaryGate::simulate(DiSimulation *simulation, DiBit aValue, DiBit bValue) {
     setInputs(simulation, aValue, bValue);
 
-    bool dead = di_simulation_flush(simulation, 10);
+    bool dead = di_simulation_run(simulation, 10);
 
     if (dead) {
         return std::nullopt;
