@@ -1,0 +1,18 @@
+name: Build Project
+on: [push]
+jobs:
+  build-project:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          submodules: recursive
+      - name: Setup
+        run: mkdir build
+      - name: Generate CMake Project
+        run: cmake ..
+        working-directory: build
+      - name: Build Project
+        run: cmake --build build
