@@ -4,8 +4,7 @@
 
 // Pop option is provided to clear the simulation queue at each step.
 // Enforce option is provided for benchmarks (REQUIRE takes a lot of time)
-template <bool pop, bool enforce = true>
-void test_simulation(size_t times) {
+template <bool pop, bool enforce = true> void test_simulation(size_t times) {
     DiSimulation simulation;
 
     di_simulation_init(&simulation);
@@ -51,22 +50,12 @@ void test_simulation(size_t times) {
     di_simulation_destroy(&simulation);
 }
 
-TEST_CASE("Test Simulation Once") {
-    test_simulation<true>(1);
-}
+TEST_CASE("Test Simulation Once") { test_simulation<true>(1); }
 
-TEST_CASE("Test Simulation 100 Times") {
-    test_simulation<false>(100);
-}
+TEST_CASE("Test Simulation 100 Times") { test_simulation<false>(100); }
 
-TEST_CASE("Test Simulation 100 Times (With Pop)") {
-    test_simulation<true>(100);
-}
+TEST_CASE("Test Simulation 100 Times (With Pop)") { test_simulation<true>(100); }
 
-TEST_CASE("Test Simulation 50000 Times") {
-    test_simulation<false>(50000);
-}
+TEST_CASE("Test Simulation 50000 Times") { test_simulation<false>(50000); }
 
-TEST_CASE("Test Simulation 50000 Times (with Pop)") {
-    test_simulation<true>(50000);
-}
+TEST_CASE("Test Simulation 50000 Times (with Pop)") { test_simulation<true>(50000); }

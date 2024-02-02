@@ -6,8 +6,8 @@
 #ifndef DIGISIM_ELEMENT_H
 #define DIGISIM_ELEMENT_H
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 /**
  * Locally kept capacity for DiNodeList.

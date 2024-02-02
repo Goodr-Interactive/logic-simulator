@@ -1,8 +1,8 @@
 #include <digisim/element.h>
 
-#include <string.h>
-#include <stdlib.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 void di_node_list_init(DiNodeList *list) {
     list->count = 0;
