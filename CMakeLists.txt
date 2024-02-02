@@ -28,8 +28,8 @@ add_library(digisim
     src/simulation.c
 )
 
-#set_target_properties(digisim PROPERTIES C_STANDARD 11)
-target_include_directories(digisim PUBLIC include)
+set_target_properties(digisim PROPERTIES C_STANDARD 11)
+target_include_directories(digisim PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 install(TARGETS digisim)
 
