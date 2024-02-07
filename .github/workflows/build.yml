@@ -3,17 +3,17 @@ on: [push]
 jobs:
   build-project:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
         with:
           submodules: recursive
       - name: Setup
-        run: mkdir build
+        run: mkdir cmake-build-release
       - name: Generate CMake Project
-        run: cmake ..
-        working-directory: build
+        run: cmake .. -DCMAKE_BUILD_RELEASE
+        working-directory: cmake-build-release
       - name: Build Project
         run: cmake --build build --target digisim
       - name: Build Tests
