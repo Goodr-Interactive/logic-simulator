@@ -10,10 +10,10 @@ jobs:
         with:
           submodules: recursive
       - name: Setup
-        run: mkdir cmake-build-release
+        run: mkdir cmake-build-debug
       - name: Generate CMake Project
-        run: cmake .. -DCMAKE_BUILD_RELEASE
-        working-directory: cmake-build-release
+        run: cmake .. -DCMAKE_BUILD_DEBUG
+        working-directory: cmake-build-debug
       - name: Build Project
         run: cmake --build build --target digisim
       - name: Build Tests
