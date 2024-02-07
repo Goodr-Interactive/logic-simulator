@@ -31,6 +31,11 @@
 #define DI_SIGNAL_SMALL_SIZE DI_BITS_PER_U64
 
 /**
+ * Number of u64 values in a DiSignal with this amount of bits.
+ */
+#define DI_SIGNAL_U64_COUNT(bits) ((bits + DI_BITS_PER_U64 - 1) / DI_BITS_PER_U64)
+
+/**
  * Represents one bit on a multi-bit wire.
  */
 typedef enum di_bit_t {
@@ -128,6 +133,16 @@ void di_signal_set(DiSignal *signal, size_t index, DiBit bit);
  * @param bit The new value for every bit in the signal
  */
 void di_signal_fill(DiSignal *signal, DiBit bit);
+
+/**
+ * Creates a signal with a certain amount of bits, all set to `bit`.
+ * Equivalent to di_signal_init and di_signal_fill `bit`
+ *
+ * @param bit The bit to fill the signal
+ * @param bits The amount of bits in the returned signal.
+ * @return A signal where all bits are set to DI_BIT_ERROR.
+ */
+DiSignal di_signal_filled(size_t bits, DiBit bit);
 
 /**
  * Compares the values of two signals.

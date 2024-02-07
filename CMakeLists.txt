@@ -11,21 +11,27 @@ add_library(digisim
     include/digisim/elements/all.h
     include/digisim/elements/input.h
     include/digisim/elements/output.h
+    include/digisim/elements/sr-latch.h
+    include/digisim/elements/multiplexer.h
+    include/digisim/elements/demultiplexer.h
+    include/digisim/elements/not.h
     include/digisim/terminal.h
     include/digisim/signal.h
-    include/digisim/elements/not.h
     include/digisim/simulation.h
 
     src/element.c
     src/node.c
-    src/elements/and.c
-    src/elements/or.c
     src/terminal.c
     src/signal.c
+    src/simulation.c
+    src/elements/and.c
+    src/elements/or.c
     src/elements/input.c
     src/elements/not.c
     src/elements/output.c
-    src/simulation.c
+    src/elements/sr-latch.c
+    src/elements/multiplexer.c
+    src/elements/demultiplexer.c
 )
 
 set_target_properties(digisim PROPERTIES C_STANDARD 11)

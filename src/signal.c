@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DI_SIGNAL_BITS_IN_U64 (64 / DI_BIT_REPRESENTATION_SIZE)
-#define DI_SIGNAL_U64_COUNT(bits) ((bits + DI_SIGNAL_BITS_IN_U64 - 1) / DI_SIGNAL_BITS_IN_U64)
-
 DiBit di_bit_logical(bool value) {
     if (value) {
         return DI_BIT_HIGH;
@@ -61,6 +58,15 @@ void di_signal_fill(DiSignal *signal, DiBit fill) {
 
         assert(di_signal_get(signal, a) == fill);
     }
+}
+
+DiSignal di_signal_filled(size_t bits, DiBit bit) {
+    DiSignal signal;
+
+    di_signal_init(&signal, bits);
+    di_signal_fill(&signal, bit);
+
+    return signal;
 }
 
 bool di_signal_equal(DiSignal *signal, DiSignal *other) {

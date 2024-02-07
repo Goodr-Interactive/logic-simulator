@@ -50,6 +50,10 @@ void di_terminal_reset(DiTerminal *terminal, DiSimulation *simulation) {
     }
 }
 
+void di_terminal_fill(DiTerminal *terminal, DiBit bit, DiSimulation *simulation) {
+    di_terminal_write(terminal, di_signal_filled(terminal->bits, bit), simulation);
+}
+
 DiSignal *di_terminal_read(DiTerminal *terminal) {
     if (!terminal->node)
         return NULL;
