@@ -15,8 +15,8 @@ jobs:
         run: cmake .. -DCMAKE_BUILD_TYPE=DEBUG
         working-directory: cmake-build-debug
       - name: Build Project
-        run: cmake --build build --target digisim
+        run: cmake --build cmake-build-debug --target digisim
       - name: Build Tests
-        run: cmake --build build --target digisim-tests
+        run: cmake --build cmake-build-debug --target digisim-tests
       - name: Test Project
-        run: ./build/tests/digisim-tests
+        run: ./cmake-build-debug/tests/digisim-tests
