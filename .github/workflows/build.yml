@@ -12,7 +12,7 @@ jobs:
       - name: Setup
         run: mkdir cmake-build-debug
       - name: Generate CMake Project
-        run: cmake .. -DCMAKE_BUILD_DEBUG
+        run: cmake .. -DCMAKE_BUILD_TYPE=DEBUG
         working-directory: cmake-build-debug
       - name: Build Project
         run: cmake --build build --target digisim
