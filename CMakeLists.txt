@@ -1,14 +1,10 @@
 cmake_minimum_required(VERSION 3.27)
 project(digisim LANGUAGES C CXX)
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CPP_STANDARD 17)
-
 add_subdirectory(external)
 
-add_library(digisim STATIC
+add_library(digisim
     include/digisim/element.h
-    include/digisim/node-list.h
     include/digisim/node.h
     include/digisim/elements/and.h
     include/digisim/elements/or.h
@@ -18,21 +14,31 @@ add_library(digisim STATIC
     include/digisim/terminal.h
     include/digisim/signal.h
     include/digisim/elements/not.h
+    include/digisim/simulation.h
 
     src/element.c
-    src/node-list.c
     src/node.c
-    src/components/and.c
-    src/components/or.c
+    src/elements/and.c
+    src/elements/or.c
     src/terminal.c
     src/signal.c
-    src/components/input.c
-    src/components/not.c
-    src/components/output.c
-    include/digisim/simulation.h
+    src/elements/input.c
+    src/elements/not.c
+    src/elements/output.c
     src/simulation.c
 )
 
-target_include_directories(digisim PUBLIC include)
+set_target_properties(digisim PROPERTIES C_STANDARD 11)
+target_include_directories(digisim PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+
+install(TARGETS digisim)
 
 add_subdirectory(tests)
+
+find_package(Doxygen)
+
+if (${DOXYGEN_FOUND})
+    set(DOXYGEN_TYPEDEF_HIDES_STRUCT YES)
+
+    doxygen_add_docs(digisim-docs include src)
+endif()

@@ -2,13 +2,13 @@
 
 #include <digisim/node.h>
 
-void di_not_changed(DiElement *component) {
+void di_not_changed(DiElement *component, DiSimulation *simulation) {
     DiNot *self = (DiNot *)component;
 
     DiSignal *signal = di_terminal_read(&self->input);
 
     if (!signal) {
-        di_terminal_reset(&self->output);
+        di_terminal_reset(&self->output, simulation);
 
         return;
     }
@@ -22,7 +22,7 @@ void di_not_changed(DiElement *component) {
         di_signal_set(&output, a, di_bit_logical(!value));
     }
 
-    di_terminal_write(&self->output, output);
+    di_terminal_write(&self->output, output, simulation);
 }
 
 void di_not_init(DiNot *self, size_t bits) {
@@ -35,4 +35,9 @@ void di_not_init(DiNot *self, size_t bits) {
     di_terminal_init(&self->output, &self->element, bits);
 }
 
-void di_not_destroy(DiNot *self) { di_element_destroy(&self->element); }
+void di_not_destroy(DiNot *self) {
+    di_terminal_destroy(&self->input);
+    di_terminal_destroy(&self->output);
+
+    di_element_destroy(&self->element);
+}

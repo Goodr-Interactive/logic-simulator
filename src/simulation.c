@@ -2,10 +2,11 @@
 
 #include <digisim/node.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define DI_SIMULATION_DEFAULT_CAPACITY 32
+#define DI_SIMULATION_DEFAULT_CAPACITY 2
 
 DiNode *di_simulation_pop(DiSimulation *simulation) {
     if (simulation->count <= 0) {
@@ -14,7 +15,7 @@ DiNode *di_simulation_pop(DiSimulation *simulation) {
 
     DiNode *node = simulation->buffer[simulation->start];
 
-    simulation->start++;
+    simulation->start = (simulation->start + 1) % simulation->capacity;
     simulation->count--;
 
     return node;
@@ -24,13 +25,15 @@ void di_simulation_step(DiSimulation *simulation) {
     size_t step_size = simulation->count;
 
     for (size_t a = 0; a < step_size; a++) {
-        DiNode *item = di_simulation_pop(simulation);
+        assert(simulation->count > 0);
 
-        // DiNode propagate
+        DiNode *node = di_simulation_pop(simulation);
+
+        di_node_propagate(node, simulation);
     }
 }
 
-bool di_simulation_flush(DiSimulation *simulation, size_t max_step) {
+bool di_simulation_run(DiSimulation *simulation, size_t max_step) {
     size_t step = 0;
 
     while (simulation->count > 0 && step < max_step) {
@@ -58,16 +61,14 @@ void di_simulation_alloc(DiSimulation *simulation, size_t capacity) {
         start_count = simulation->count;
     }
 
-    memcpy(new_buffer, simulation->buffer + simulation->start,
-           start_count * sizeof(DiNode *));
+    memcpy(new_buffer, simulation->buffer + simulation->start, start_count * sizeof(DiNode *));
 
     if (start_count < simulation->count) {
         // copy second half
 
         size_t remaining_count = simulation->count - start_count;
 
-        memcpy(new_buffer + start_count, simulation->buffer,
-               remaining_count * sizeof(DiNode *));
+        memcpy(new_buffer + start_count, simulation->buffer, remaining_count * sizeof(DiNode *));
     }
 
     free(simulation->buffer);
@@ -78,8 +79,12 @@ void di_simulation_alloc(DiSimulation *simulation, size_t capacity) {
 }
 
 void di_simulation_add(DiSimulation *simulation, DiNode *node) {
+    if (!simulation) {
+        return;
+    }
+
     if (simulation->count >= simulation->capacity) {
-        size_t new_capacity = simulation->capacity;
+        size_t new_capacity = simulation->capacity * 2;
 
         if (new_capacity < simulation->count + 1) {
             new_capacity = simulation->count + 1;
@@ -102,6 +107,4 @@ void di_simulation_init(DiSimulation *simulation) {
     simulation->buffer = malloc(simulation->capacity * sizeof(DiNode **));
 }
 
-void di_simulation_destroy(DiSimulation *simulation) {
-    free(simulation->buffer);
-}
+void di_simulation_destroy(DiSimulation *simulation) { free(simulation->buffer); }

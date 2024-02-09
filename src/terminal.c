@@ -2,37 +2,66 @@
 
 #include <digisim/node.h>
 
+#include <assert.h>
+#include <string.h>
+
 void di_terminal_init(DiTerminal *terminal, DiElement *parent, size_t bits) {
     terminal->parent = parent;
     terminal->bits = bits;
     terminal->node = NULL;
+
+    terminal->holding = false;
+    memset(&terminal->signal, 0, sizeof(DiSignal));
 }
 
-void di_terminal_write(DiTerminal *terminal, DiSignal move_signal) {
-    if (!terminal->node) {
-        return;
-    }
+void di_terminal_destroy(DiTerminal *terminal) {
+    // Disconnect all wires first, please!
+    assert(!terminal->node);
 
-    di_node_set(terminal->node, terminal, move_signal);
+    if (terminal->holding) {
+        di_signal_destroy(&terminal->signal);
+    }
 }
 
-void di_terminal_reset(DiTerminal *terminal) {
-    if (!terminal->node) {
-        return;
+void di_terminal_write(DiTerminal *terminal, DiSignal move_signal, DiSimulation *simulation) {
+    assert(move_signal.bits == terminal->bits);
+
+    if (terminal->holding) {
+        di_signal_destroy(&terminal->signal);
     }
 
-    di_node_reset(terminal->node, terminal);
+    terminal->holding = true;
+    terminal->signal = move_signal;
+
+    if (terminal->node) {
+        di_node_changed(terminal->node, simulation);
+    }
+}
+
+void di_terminal_reset(DiTerminal *terminal, DiSimulation *simulation) {
+    if (terminal->holding) {
+        di_signal_destroy(&terminal->signal);
+    }
+
+    terminal->holding = false;
+
+    if (terminal->node) {
+        di_node_changed(terminal->node, simulation);
+    }
 }
 
 DiSignal *di_terminal_read(DiTerminal *terminal) {
     if (!terminal->node)
         return NULL;
 
-    DiNodeConnection *wire = terminal->node->hold;
+    DiTerminal *wire = terminal->node->hold;
 
-    if (!wire || !wire->holding) {
+    if (!wire) {
         return NULL;
     }
+
+    assert(wire->holding);
+    assert(terminal->bits == wire->signal.bits);
 
     return &wire->signal;
 }

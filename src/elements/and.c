@@ -2,14 +2,14 @@
 
 #include <digisim/node.h>
 
-void di_and_changed(DiElement *component) {
+void di_and_changed(DiElement *component, DiSimulation *simulation) {
     DiAnd *self = (DiAnd *)component;
 
     DiSignal *in_a = di_terminal_read(&self->input_a);
     DiSignal *in_b = di_terminal_read(&self->input_b);
 
     if (!in_a || !in_b) {
-        di_terminal_reset(&self->output);
+        di_terminal_reset(&self->output, simulation);
 
         return;
     }
@@ -24,16 +24,14 @@ void di_and_changed(DiElement *component) {
         di_signal_set(&output, a, di_bit_logical(lhs && rhs));
     }
 
-    di_terminal_write(&self->output, output);
+    di_terminal_write(&self->output, output, simulation);
 }
 
 void di_and_init(DiAnd *self, size_t bits) {
-    DiElement component = {
-        .retain = NULL, .release = NULL, .changed = di_and_changed};
+    di_element_init(&self->element);
 
-    di_element_init(&component);
+    self->element.changed = di_and_changed;
 
-    self->element = component;
     self->bits = bits;
 
     di_terminal_init(&self->input_a, &self->element, bits);
@@ -42,4 +40,10 @@ void di_and_init(DiAnd *self, size_t bits) {
     di_terminal_init(&self->output, &self->element, bits);
 }
 
-void di_and_destroy(DiAnd *self) { di_element_destroy(&self->element); }
+void di_and_destroy(DiAnd *self) {
+    di_terminal_destroy(&self->input_a);
+    di_terminal_destroy(&self->input_b);
+    di_terminal_destroy(&self->output);
+
+    di_element_destroy(&self->element);
+}

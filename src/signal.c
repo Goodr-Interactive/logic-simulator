@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DI_SIGNAL_U64_COUNT(bits)                                              \
-    ((bits + 63) / 64 * DI_BIT_REPRESENTATION_SIZE)
+#define DI_SIGNAL_BITS_IN_U64 (64 / DI_BIT_REPRESENTATION_SIZE)
+#define DI_SIGNAL_U64_COUNT(bits) ((bits + DI_SIGNAL_BITS_IN_U64 - 1) / DI_SIGNAL_BITS_IN_U64)
 
 DiBit di_bit_logical(bool value) {
     if (value) {
@@ -36,8 +36,7 @@ DiBit di_signal_get(DiSignal *signal, size_t index) {
 
     uint64_t value = values[i];
 
-    return (value >> (off * DI_BIT_REPRESENTATION_SIZE)) &
-           DI_BIT_REPRESENTATION_MASK;
+    return (value >> (off * DI_BIT_REPRESENTATION_SIZE)) & DI_BIT_REPRESENTATION_MASK;
 }
 
 void di_signal_set(DiSignal *signal, size_t index, DiBit bit) {
@@ -50,8 +49,7 @@ void di_signal_set(DiSignal *signal, size_t index, DiBit bit) {
 
     uint64_t value = values[i];
 
-    value &= ~((size_t)DI_BIT_REPRESENTATION_MASK
-               << (off * DI_BIT_REPRESENTATION_SIZE));
+    value &= ~((size_t)DI_BIT_REPRESENTATION_MASK << (off * DI_BIT_REPRESENTATION_SIZE));
     value |= (uint64_t)(bit) << (off * DI_BIT_REPRESENTATION_SIZE);
 
     values[i] = value;
