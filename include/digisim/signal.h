@@ -11,29 +11,27 @@
 #include <stdint.h>
 
 /**
- * Number of bits required to one DiBit.
- */
-#define DI_BIT_REPRESENTATION_SIZE 2
-
-/**
- * Mask for isolating one DiBit.
- */
-#define DI_BIT_REPRESENTATION_MASK 0b11
-
-/**
  * Number of DiBits that can fit in one u64.
  */
-#define DI_BITS_PER_U64 (64 / DI_BIT_REPRESENTATION_SIZE)
+#define DI_SIGNAL_BITS_PER_U64 64
 
 /**
  * Locally kept capacity for DiSignal.
  */
-#define DI_SIGNAL_SMALL_SIZE DI_BITS_PER_U64
+#define DI_SIGNAL_SMALL_SIZE DI_SIGNAL_BITS_PER_U64
 
 /**
  * Number of u64 values in a DiSignal with this amount of bits.
  */
-#define DI_SIGNAL_U64_COUNT(bits) ((bits + DI_BITS_PER_U64 - 1) / DI_BITS_PER_U64)
+#define DI_SIGNAL_U64_COUNT(bits) ((bits + DI_SIGNAL_BITS_PER_U64 - 1) / DI_SIGNAL_BITS_PER_U64)
+
+/**
+ * Number of u64 values in a DiSignal with this amount of bits.
+ */
+#define DI_SIGNAL_U64_ALLOC(bits) (3 * DI_SIGNAL_U64_COUNT(bits))
+
+#define DI_SIGNAL_ERROR_OFFSET(bits) DI_SIGNAL_U64_COUNT(bits)
+#define DI_SIGNAL_UNKNOWN_OFFSET(bits) (2 * DI_SIGNAL_U64_COUNT(bits))
 
 /**
  * Represents one bit on a multi-bit wire.
@@ -45,9 +43,9 @@ typedef enum di_bit_t {
     DI_BIT_LOW = 0b00,
 
     /**
-     * Unconnected wire, disabled buffer output...
+     * High, Vcc, logical one...
      */
-    DI_BIT_UNKNOWN = 0b01,
+    DI_BIT_HIGH = 0b01,
 
     /**
      * Mix of logical one and zero, invalid circuit input...
@@ -55,9 +53,9 @@ typedef enum di_bit_t {
     DI_BIT_ERROR = 0b10,
 
     /**
-     * High, Vcc, logical one...
+     * Unconnected wire, disabled buffer output...
      */
-    DI_BIT_HIGH = 0b11,
+    DI_BIT_UNKNOWN = 0b11,
 } DiBit;
 
 /**
@@ -78,7 +76,7 @@ typedef struct di_signal_t {
         /**
          * Locally held storage for bits. Used if `bits <= DI_SIGNAL_SMALL_SIZE`.
          */
-        uint64_t local;
+        uint64_t local[3];
 
         /**
          * Heap allocated storage for bits. Used if `bits > DI_SIGNAL_SMALL_SIZE`.
@@ -86,6 +84,10 @@ typedef struct di_signal_t {
         uint64_t *heap;
     };
 } DiSignal;
+
+uint64_t *di_signal_get_values(DiSignal *signal);
+uint64_t *di_signal_get_error(DiSignal *signal);
+uint64_t *di_signal_get_unknown(DiSignal *signal);
 
 /**
  * Returns `DI_BIT_HIGH` if value is true, `DI_BIT_LOW` otherwise.
@@ -164,16 +166,6 @@ bool di_signal_equal(DiSignal *signal, DiSignal *other);
  * @param source The signal to acquire the bits from
  */
 void di_signal_copy(DiSignal *signal, DiSignal *source);
-
-/**
- * A packed u64 array containing all DiBits.
- * values[0] contains the first 32 DiBits, values[1] contains the next 32 bits, etc.
- *
- * @memberof DiSignal
- * @param signal The signal to access
- * @return A packed u64 array of all contained DiBits
- */
-uint64_t *di_signal_values(DiSignal *signal);
 
 /**
  * Initialize a DiSignal struct.

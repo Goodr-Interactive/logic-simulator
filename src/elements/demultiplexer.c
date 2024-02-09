@@ -22,8 +22,16 @@ void di_demultiplexer_changed(DiElement *element, DiSimulation *simulation) {
 
     assert(select_signal->bits < 64);
 
-    uint64_t *values = di_signal_values(select_signal);
+    uint64_t *values = di_signal_get_values(select_signal);
+    uint64_t *error = di_signal_get_error(select_signal);
+    uint64_t *unknown = di_signal_get_unknown(select_signal);
     uint64_t select = values[0];
+
+    if (error[0] != 0 || unknown[0] != 0) {
+        di_demultiplexer_disconnect(demultiplexer, simulation);
+
+        return;
+    }
 
     for (size_t a = 0; a < demultiplexer->output_count; a++) {
         DiSignal output;
