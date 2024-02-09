@@ -11,6 +11,8 @@ void di_node_list_init(DiNodeList *list) {
 }
 
 void di_node_list_destroy(DiNodeList *list) {
+    assert(list->count <= 0);
+
     if (list->heap_alloc) {
         free(list->heap);
     }

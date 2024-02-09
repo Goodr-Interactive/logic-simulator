@@ -183,10 +183,14 @@ void di_node_connections_init(DiNodeConnections *list) {
     list->heap_alloc = false;
 }
 
-void di_node_connections_destroy(DiNodeConnections *list) {
+void di_node_connections_destroy(DiNodeConnections *list, DiNode *node) {
     DiTerminal **values = di_node_connections_values(list);
 
     for (size_t a = 0; a < list->count; a++) {
+        if (node) {
+            di_node_list_remove(&values[a]->parent->connections, node);
+        }
+
         values[a]->node = NULL;
     }
 
@@ -202,7 +206,7 @@ void di_node_init(DiNode *node) {
     di_node_connections_init(&node->connections);
 }
 
-void di_node_destroy(DiNode *node) { di_node_connections_destroy(&node->connections); }
+void di_node_destroy(DiNode *node) { di_node_connections_destroy(&node->connections, node); }
 
 void di_connect_simulate(DiNode *node, DiTerminal *connection, DiSimulation *simulation) {
     assert(!connection->node || connection->node == node);
