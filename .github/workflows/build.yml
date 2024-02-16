@@ -1,0 +1,22 @@
+name: Build Project
+on: [push]
+jobs:
+  build-project:
+    name: Build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          submodules: recursive
+      - name: Setup
+        run: mkdir cmake-build-debug
+      - name: Generate CMake Project
+        run: cmake .. -DCMAKE_BUILD_TYPE=DEBUG
+        working-directory: cmake-build-debug
+      - name: Build Project
+        run: cmake --build cmake-build-debug --target digisim
+      - name: Build Tests
+        run: cmake --build cmake-build-debug --target digisim-tests
+      - name: Test Project
+        run: ./cmake-build-debug/tests/digisim-tests
