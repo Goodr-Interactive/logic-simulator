@@ -56,21 +56,17 @@ TEST_CASE("Test Multiplexer Step High") {
 DiBit testMultiplexer(DiBit x, DiBit y, DiBit s) {
     Multiplexer multiplexer;
 
-    DiUnitSimulation unit;
+    DiSimulation *simulation = di_simulation_create();
 
-    di_unit_simulation_init(&unit);
+    di_input_set_bit(&multiplexer.c, 0, x, simulation);
+    di_input_set_bit(&multiplexer.b, 0, s, simulation);
+    di_input_set_bit(&multiplexer.a, 0, y, simulation);
 
-    di_input_set_bit(&multiplexer.c, 0, x, &unit.simulation);
-    di_input_set_bit(&multiplexer.b, 0, s, &unit.simulation);
-    di_input_set_bit(&multiplexer.a, 0, y, &unit.simulation);
-
-    REQUIRE(unit.count == 3);
-
-    di_unit_simulation_run(&unit, 100);
+    di_simulation_run(simulation, 100);
 
     DiBit value = di_signal_get(&multiplexer.f.signal, 0);
 
-    di_unit_simulation_destroy(&unit);
+    di_simulation_free(simulation);
 
     return value;
 }

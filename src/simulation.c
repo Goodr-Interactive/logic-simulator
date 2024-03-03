@@ -2,6 +2,7 @@
 
 #include <digisim/node.h>
 #include <digisim/simulations/unit-delay.h>
+#include <digisim/simulations/zero-delay.h>
 
 #include <stdlib.h>
 
@@ -21,17 +22,29 @@ void di_simulation_add(DiSimulation *simulation, DiNode *node) {
 
 DiSimulation *di_simulation_create() {
     // Default simulation is the unit simulation.
-    DiUnitSimulation *simulation = malloc(sizeof(DiUnitSimulation));
+//    DiUnitSimulation *simulation = malloc(sizeof(DiUnitSimulation));
+//
+//    di_unit_simulation_init(simulation);
+//
+//    return (DiSimulation *)simulation;
 
-    di_unit_simulation_init(simulation);
+    DiZeroSimulation *simulation = malloc(sizeof(DiZeroSimulation));
+
+    di_zero_simulation_init(simulation);
 
     return (DiSimulation *)simulation;
 }
 
 void di_simulation_free(DiSimulation *simulation) {
-    DiUnitSimulation *unit = (DiUnitSimulation *)simulation;
+//    DiUnitSimulation *unit = (DiUnitSimulation *)simulation;
+//
+//    di_unit_simulation_destroy(unit);
+//
+//    free(unit);
 
-    di_unit_simulation_destroy(unit);
+    DiZeroSimulation *zero = (DiZeroSimulation *)simulation;
 
-    free(unit);
+    di_zero_simulation_destroy(zero);
+
+    free(zero);
 }
