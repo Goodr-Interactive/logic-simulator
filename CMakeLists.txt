@@ -18,6 +18,8 @@ add_library(digisim
     include/digisim/terminal.h
     include/digisim/signal.h
     include/digisim/simulation.h
+    include/digisim/simulations/unit-delay.h
+    include/digisim/simulations/zero-delay.h
 
     src/element.c
     src/node.c
@@ -32,6 +34,8 @@ add_library(digisim
     src/elements/sr-latch.c
     src/elements/multiplexer.c
     src/elements/demultiplexer.c
+    src/simulations/unit-delay.c
+    src/simulations/zero-delay.c
 )
 
 set_target_properties(digisim PROPERTIES C_STANDARD 11)

@@ -5,9 +5,7 @@
 // Pop option is provided to clear the simulation queue at each step.
 // Enforce option is provided for benchmarks (REQUIRE takes a lot of time)
 template <bool pop, bool enforce = true> void test_simulation(size_t times) {
-    DiSimulation simulation;
-
-    di_simulation_init(&simulation);
+    DiSimulation *simulation = di_simulation_create();
 
     DiAnd gate;
 
@@ -27,19 +25,19 @@ template <bool pop, bool enforce = true> void test_simulation(size_t times) {
             auto [a, b, result] = inputs[index % inputs.size()];
 
             if constexpr (pop) {
-                std::optional<DiBit> value = binary.simulate(&simulation, a, b);
+                std::optional<DiBit> value = binary.simulate(simulation, a, b);
 
                 if constexpr (enforce) {
                     REQUIRE(value.has_value());
                     REQUIRE(value.value() == result);
                 }
             } else {
-                binary.setInputs(&simulation, a, b);
+                binary.setInputs(simulation, a, b);
             }
         }
 
         if (!pop) {
-            bool dead = di_simulation_run(&simulation, 10);
+            bool dead = di_simulation_run(simulation, 10);
 
             REQUIRE(!dead);
         }
@@ -47,7 +45,7 @@ template <bool pop, bool enforce = true> void test_simulation(size_t times) {
 
     di_and_destroy(&gate);
 
-    di_simulation_destroy(&simulation);
+    di_simulation_free(simulation);
 }
 
 TEST_CASE("Test Simulation Once") { test_simulation<true>(1); }

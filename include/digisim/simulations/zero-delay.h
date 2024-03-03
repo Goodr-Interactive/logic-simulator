@@ -1,0 +1,4 @@
+#ifndef DIGISIM_ZERO_DELAY_H
+#define DIGISIM_ZERO_DELAY_H
+
+#endif // DIGISIM_ZERO_DELAY_H

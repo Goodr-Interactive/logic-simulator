@@ -7,13 +7,11 @@ void UnaryGate::setInput(DiSimulation *simulation, DiBit value) {
 }
 
 std::optional<DiBit> UnaryGate::simulate(DiBit inputValue) {
-    DiSimulation simulation;
+    DiSimulation *simulation = di_simulation_create();
 
-    di_simulation_init(&simulation);
+    std::optional<DiBit> outputValue = simulate(simulation, inputValue);
 
-    std::optional<DiBit> outputValue = simulate(&simulation, inputValue);
-
-    di_simulation_destroy(&simulation);
+    di_simulation_free(simulation);
 
     return outputValue;
 }
@@ -58,13 +56,11 @@ void BinaryGate::setInputs(DiSimulation *simulation, DiBit aValue, DiBit bValue)
 }
 
 std::optional<DiBit> BinaryGate::simulate(DiBit aValue, DiBit bValue) {
-    DiSimulation simulation;
+    DiSimulation *simulation = di_simulation_create();
 
-    di_simulation_init(&simulation);
+    std::optional<DiBit> outputValue = simulate(simulation, aValue, bValue);
 
-    std::optional<DiBit> outputValue = simulate(&simulation, aValue, bValue);
-
-    di_simulation_destroy(&simulation);
+    di_simulation_free(simulation);
 
     return outputValue;
 }

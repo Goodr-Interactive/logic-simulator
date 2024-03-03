@@ -2,20 +2,23 @@
 
 #include <utils/multiplexer.h>
 
+extern "C" {
+#include <digisim/simulations/unit-delay.h>
+}
+
 TEST_CASE("Test Multiplexer Creation") { Multiplexer multiplexer; }
 
 TEST_CASE("Test Multiplexer Step Low") {
     Multiplexer multiplexer;
 
-    DiSimulation simulation;
+    DiUnitSimulation unit;
+    di_unit_simulation_init(&unit);
 
-    di_simulation_init(&simulation);
+    multiplexer.addInputs(&unit.simulation);
 
-    multiplexer.addInputs(&simulation);
+    REQUIRE(unit.count == 3);
 
-    REQUIRE(simulation.count == 3);
-
-    di_simulation_step(&simulation);
+    di_unit_simulation_run(&unit, 1);
 
     REQUIRE(multiplexer.and1.output.holding);
     REQUIRE(di_signal_get(&multiplexer.and1.output.signal, 0) == DI_BIT_LOW);
@@ -23,24 +26,23 @@ TEST_CASE("Test Multiplexer Step Low") {
     REQUIRE(multiplexer.and2.output.holding);
     REQUIRE(di_signal_get(&multiplexer.and2.output.signal, 0) == DI_BIT_LOW);
 
-    di_simulation_destroy(&simulation);
+    di_unit_simulation_destroy(&unit);
 }
 
 TEST_CASE("Test Multiplexer Step High") {
     Multiplexer multiplexer;
 
-    DiSimulation simulation;
+    DiUnitSimulation unit;
 
-    di_simulation_init(&simulation);
+    di_unit_simulation_init(&unit);
 
-    di_input_set_bit(&multiplexer.c, 0, DI_BIT_HIGH, &simulation);
-    di_input_set_bit(&multiplexer.b, 0, DI_BIT_LOW, &simulation);
-    di_input_set_bit(&multiplexer.a, 0, DI_BIT_LOW, &simulation);
+    di_input_set_bit(&multiplexer.c, 0, DI_BIT_HIGH, &unit.simulation);
+    di_input_set_bit(&multiplexer.b, 0, DI_BIT_LOW, &unit.simulation);
+    di_input_set_bit(&multiplexer.a, 0, DI_BIT_LOW, &unit.simulation);
 
-    REQUIRE(simulation.count == 3);
+    REQUIRE(unit.count == 3);
 
-    di_simulation_step(&simulation);
-    di_simulation_step(&simulation);
+    di_unit_simulation_run(&unit, 2);
 
     REQUIRE(multiplexer.and1.output.holding);
     REQUIRE(di_signal_get(&multiplexer.and1.output.signal, 0) == DI_BIT_LOW);
@@ -48,27 +50,27 @@ TEST_CASE("Test Multiplexer Step High") {
     REQUIRE(multiplexer.and2.output.holding);
     REQUIRE(di_signal_get(&multiplexer.and2.output.signal, 0) == DI_BIT_HIGH);
 
-    di_simulation_destroy(&simulation);
+    di_unit_simulation_destroy(&unit);
 }
 
 DiBit testMultiplexer(DiBit x, DiBit y, DiBit s) {
     Multiplexer multiplexer;
 
-    DiSimulation simulation;
+    DiUnitSimulation unit;
 
-    di_simulation_init(&simulation);
+    di_unit_simulation_init(&unit);
 
-    di_input_set_bit(&multiplexer.c, 0, x, &simulation);
-    di_input_set_bit(&multiplexer.b, 0, s, &simulation);
-    di_input_set_bit(&multiplexer.a, 0, y, &simulation);
+    di_input_set_bit(&multiplexer.c, 0, x, &unit.simulation);
+    di_input_set_bit(&multiplexer.b, 0, s, &unit.simulation);
+    di_input_set_bit(&multiplexer.a, 0, y, &unit.simulation);
 
-    REQUIRE(simulation.count == 3);
+    REQUIRE(unit.count == 3);
 
-    di_simulation_run(&simulation, 100);
+    di_unit_simulation_run(&unit, 100);
 
     DiBit value = di_signal_get(&multiplexer.f.signal, 0);
 
-    di_simulation_destroy(&simulation);
+    di_unit_simulation_destroy(&unit);
 
     return value;
 }

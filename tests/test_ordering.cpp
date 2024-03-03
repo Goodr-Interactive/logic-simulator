@@ -5,31 +5,27 @@
 TEST_CASE("Test SR Latch Is Astable") {
     SrLatch latch;
 
-    DiSimulation simulation;
+    DiSimulation *simulation = di_simulation_create();
 
-    di_simulation_init(&simulation);
+    latch.addInputs(simulation);
 
-    latch.addInputs(&simulation);
-
-    bool dead = di_simulation_run(&simulation, 100);
+    bool dead = di_simulation_run(simulation, 100);
 
     REQUIRE(dead);
 
-    di_simulation_destroy(&simulation);
+    di_simulation_free(simulation);
 }
 
 TEST_CASE("Test SR Latch Ordering") {
     SrLatch latch;
 
-    DiSimulation simulation;
+    DiSimulation *simulation = di_simulation_create();
 
-    di_simulation_init(&simulation);
+    latch.addInputs(simulation);
 
-    latch.addInputs(&simulation);
+    di_input_set_bit(&latch.set, 0, DI_BIT_HIGH, simulation);
 
-    di_input_set_bit(&latch.set, 0, DI_BIT_HIGH, &simulation);
-
-    bool dead = di_simulation_run(&simulation, 100);
+    bool dead = di_simulation_run(simulation, 100);
 
     REQUIRE(!dead);
 
@@ -42,5 +38,5 @@ TEST_CASE("Test SR Latch Ordering") {
     REQUIRE(firstBit == DI_BIT_HIGH);
     REQUIRE(secondBit == DI_BIT_LOW);
 
-    di_simulation_destroy(&simulation);
+    di_simulation_free(simulation);
 }
