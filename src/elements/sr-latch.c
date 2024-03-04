@@ -1,4 +1,4 @@
-#include "digisim/elements/sr-latch.h"
+#include <digisim/elements/sr-latch.h>
 
 #include <stdlib.h>
 
@@ -45,6 +45,6 @@ void di_sr_latch_destroy(DiSrLatch *latch) {
     di_element_destroy(&latch->element);
 
     di_terminal_destroy(&latch->set);
-    di_terminal_destroy(&latch->set);
-    di_terminal_destroy(&latch->set);
+    di_terminal_destroy(&latch->reset);
+    di_terminal_destroy(&latch->value);
 }

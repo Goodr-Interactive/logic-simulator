@@ -13,6 +13,7 @@
 #include <digisim/elements/multiplexer.h>
 #include <digisim/elements/demultiplexer.h>
 #include <digisim/elements/sr-latch.h>
+#include <digisim/elements/d-latch.h>
 #include <digisim/elements/nand.h>
 #include <digisim/elements/nor.h>
 #include <digisim/elements/xor.h>
