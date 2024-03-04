@@ -12,7 +12,14 @@
 typedef struct di_node_t DiNode;
 typedef struct di_simulation_t DiSimulation;
 
+/**
+ * Callback to add a node to a simulation.
+ */
 typedef void (*DiSimulationAddCallback)(DiSimulation *simulation, DiNode *node);
+
+/**
+ * Callback to run this simulation.
+ */
 typedef bool (*DiSimulationRunCallback)(DiSimulation *simulation, size_t max_depth);
 
 /**
@@ -26,7 +33,14 @@ typedef bool (*DiSimulationRunCallback)(DiSimulation *simulation, size_t max_dep
  * To initialize/destroy, use di_simulation_init/di_simulation_destroy.
  */
 typedef struct di_simulation_t {
+    /**
+     * Callback that's called when an element wants to propagate a wire value.
+     */
     DiSimulationAddCallback add;
+
+    /**
+     * Callback that's called by the user to start simulating.
+     */
     DiSimulationRunCallback run;
 } DiSimulation;
 
@@ -50,7 +64,22 @@ bool di_simulation_run(DiSimulation *simulation, size_t max_depth);
  */
 void di_simulation_add(DiSimulation *simulation, DiNode *node);
 
+/**
+ * Allocates and returns a pointer to a default simulation.
+ *
+ * By default this is the zero delay simulation (digisim/simulations/zero-delay.h).
+ *
+ * Free this pointer using di_simulation_free.
+ *
+ * @return A pointer to a DiSimulation object.
+ */
 DiSimulation *di_simulation_create();
+
+/**
+ * Frees a pointer created by `di_simulation_create`.
+ *
+ * @param simulation A pointer allocated by `di_simulation_create`.
+ */
 void di_simulation_free(DiSimulation *simulation);
 
 #endif // DIGISIM_SIMULATION_H

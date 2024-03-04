@@ -20,13 +20,17 @@ DiZeroSimulationEntry *di_zero_simulation_pop(DiZeroSimulation *simulation) {
 }
 
 bool di_zero_simulation_run(DiZeroSimulation *simulation, size_t max_step) {
+    DiNodeList terminated;
+
+    di_node_list_init(&terminated);
+
     size_t step = 0;
 
     while (simulation->count > 0 && step < max_step) {
         DiZeroSimulationEntry entry = *di_zero_simulation_pop(simulation);
 
         if (entry.depth > max_step) {
-            di_node_list_add(&simulation->terminated, entry.node);
+            di_node_list_add(&terminated, entry.node);
         } else {
             simulation->current_depth = entry.depth + 1;
 
@@ -38,15 +42,15 @@ bool di_zero_simulation_run(DiZeroSimulation *simulation, size_t max_step) {
     simulation->current_depth = 0;
 
     // We terminated early, but if we simulate again we should simulate these parts of the circuit.
-    DiNode **terminated_nodes = di_node_list_values(&simulation->terminated);
+    DiNode **terminated_nodes = di_node_list_values(&terminated);
 
-    for (size_t a = 0; a < simulation->terminated.count; a++) {
+    for (size_t a = 0; a < terminated.count; a++) {
         DiNode *node = terminated_nodes[a];
 
         di_zero_simulation_add(simulation, node);
     }
 
-    di_node_list_clear(&simulation->terminated);
+    di_node_list_destroy(&terminated);
 
     return step == max_step && simulation->count > 0;
 }
@@ -104,12 +108,8 @@ void di_zero_simulation_init(DiZeroSimulation *simulation) {
     simulation->current_depth = 0;
 
     simulation->buffer = malloc(simulation->capacity * sizeof(DiZeroSimulationEntry));
-
-    di_node_list_init(&simulation->terminated);
 }
 
 void di_zero_simulation_destroy(DiZeroSimulation *simulation) {
     free(simulation->buffer);
-
-    di_node_list_destroy(&simulation->terminated);
 }

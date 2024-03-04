@@ -67,6 +67,9 @@ typedef struct di_node_t {
      */
     DiNodeConnections connections;
 
+    /**
+     * The number of bits carried by this wire.
+     */
     size_t bits;
 
     /**
@@ -76,6 +79,11 @@ typedef struct di_node_t {
      */
     DiSignal signal;
 
+    /**
+     * The last value of the signal, before a change was propagated.
+     *
+     * It is recommended to avoid using this value, it is here to avoid allocations in di_node_propagate.
+     */
     DiSignal last_signal;
 } DiNode;
 
@@ -84,6 +92,7 @@ typedef struct di_node_t {
  *
  * @memberof DiNode
  * @param node Pointer to initialize
+ * @param bits Number of bits carried by this wire
  */
 void di_node_init(DiNode *node, size_t bits);
 
