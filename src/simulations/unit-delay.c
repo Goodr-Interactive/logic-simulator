@@ -3,8 +3,8 @@
 #include <digisim/node.h>
 
 #include <assert.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define DI_SIMULATION_DEFAULT_CAPACITY 2
 

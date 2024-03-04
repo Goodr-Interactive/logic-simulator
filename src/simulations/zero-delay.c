@@ -77,12 +77,11 @@ void di_zero_simulation_add(DiZeroSimulation *simulation, DiNode *node) {
         di_zero_simulation_alloc(simulation, new_capacity);
     }
 
-    DiZeroSimulationEntry entry = { node, simulation->current_depth };
+    DiZeroSimulationEntry entry = {node, simulation->current_depth};
 
     simulation->buffer[simulation->count] = entry;
     simulation->count++;
 }
-
 
 void di_zero_simulation_add_adapter(DiSimulation *simulation, DiNode *node) {
     DiZeroSimulation *zero = (DiZeroSimulation *)simulation;

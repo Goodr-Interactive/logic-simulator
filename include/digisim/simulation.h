@@ -12,8 +12,8 @@
 typedef struct di_node_t DiNode;
 typedef struct di_simulation_t DiSimulation;
 
-typedef void (* DiSimulationAddCallback)(DiSimulation *simulation, DiNode *node);
-typedef bool (* DiSimulationRunCallback)(DiSimulation *simulation, size_t max_depth);
+typedef void (*DiSimulationAddCallback)(DiSimulation *simulation, DiNode *node);
+typedef bool (*DiSimulationRunCallback)(DiSimulation *simulation, size_t max_depth);
 
 /**
  * Keeps track of simulation parameters and holds a queue of nodes to "propagate."

@@ -2,9 +2,7 @@
 
 #include <optional>
 
-void UnaryGate::setInput(DiSimulation *simulation, DiBit value) {
-    di_input_set_bit(&a, 0, value, simulation);
-}
+void UnaryGate::setInput(DiSimulation *simulation, DiBit value) { di_input_set_bit(&a, 0, value, simulation); }
 
 std::optional<DiBit> UnaryGate::simulate(DiBit inputValue) {
     DiSimulation *simulation = di_simulation_create();

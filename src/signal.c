@@ -124,12 +124,12 @@ bool di_signal_equal(DiSignal *signal, DiSignal *other) {
 
     uint64_t mask = DI_SIGNAL_TOP_BIT_MASK(top_bits);
 
-    return memcmp(signal_values, other_values, body_u64_size) == 0
-        && (signal_values[body_count] & mask) == (other_values[body_count] & mask)
-        && memcmp(signal_error, other_error, body_u64_size) == 0
-        && (signal_error[body_count] & mask) == (other_error[body_count] & mask)
-        && memcmp(signal_unknown, other_unknown, body_u64_size) == 0
-        && (signal_unknown[body_count] & mask) == (other_unknown[body_count] & mask);
+    return memcmp(signal_values, other_values, body_u64_size) == 0 &&
+           (signal_values[body_count] & mask) == (other_values[body_count] & mask) &&
+           memcmp(signal_error, other_error, body_u64_size) == 0 &&
+           (signal_error[body_count] & mask) == (other_error[body_count] & mask) &&
+           memcmp(signal_unknown, other_unknown, body_u64_size) == 0 &&
+           (signal_unknown[body_count] & mask) == (other_unknown[body_count] & mask);
 }
 
 void di_signal_copy(DiSignal *signal, DiSignal *source) {

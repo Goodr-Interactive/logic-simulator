@@ -28,5 +28,4 @@ Astable::~Astable() {
     }
 
     di_input_destroy(&input);
-
 }

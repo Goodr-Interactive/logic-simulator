@@ -22,11 +22,11 @@ void di_simulation_add(DiSimulation *simulation, DiNode *node) {
 
 DiSimulation *di_simulation_create() {
     // Default simulation is the unit simulation.
-//    DiUnitSimulation *simulation = malloc(sizeof(DiUnitSimulation));
-//
-//    di_unit_simulation_init(simulation);
-//
-//    return (DiSimulation *)simulation;
+    //    DiUnitSimulation *simulation = malloc(sizeof(DiUnitSimulation));
+    //
+    //    di_unit_simulation_init(simulation);
+    //
+    //    return (DiSimulation *)simulation;
 
     DiZeroSimulation *simulation = malloc(sizeof(DiZeroSimulation));
 
@@ -36,11 +36,11 @@ DiSimulation *di_simulation_create() {
 }
 
 void di_simulation_free(DiSimulation *simulation) {
-//    DiUnitSimulation *unit = (DiUnitSimulation *)simulation;
-//
-//    di_unit_simulation_destroy(unit);
-//
-//    free(unit);
+    //    DiUnitSimulation *unit = (DiUnitSimulation *)simulation;
+    //
+    //    di_unit_simulation_destroy(unit);
+    //
+    //    free(unit);
 
     DiZeroSimulation *zero = (DiZeroSimulation *)simulation;
 

@@ -32,7 +32,6 @@ typedef struct di_output_t {
      */
     DiSignal signal;
 
-
     /**
      * Input terminal
      *

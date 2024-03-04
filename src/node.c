@@ -54,8 +54,8 @@ void di_node_changed(DiNode *node, DiSimulation *simulation) {
         uint64_t *terminal_unknown = di_signal_get_unknown(&terminal->signal);
 
         for (size_t i = 0; i < DI_SIGNAL_U64_COUNT(node->bits); i++) {
-            uint64_t error = signal_error[i] | terminal_error[i]
-                | (~(signal_unknown[i] | terminal_unknown[i]) & (signal_values[i] ^ terminal_values[i]));
+            uint64_t error = signal_error[i] | terminal_error[i] |
+                             (~(signal_unknown[i] | terminal_unknown[i]) & (signal_values[i] ^ terminal_values[i]));
             uint64_t unknown = signal_unknown[i] & terminal_unknown[i] & ~error;
             uint64_t value = signal_values[i] | terminal_values[i] & ~error;
 
