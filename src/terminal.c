@@ -11,27 +11,26 @@ void di_terminal_init(DiTerminal *terminal, DiElement *parent, size_t bits) {
     terminal->node = NULL;
 
     terminal->holding = false;
-    memset(&terminal->signal, 0, sizeof(DiSignal));
+    di_signal_init(&terminal->signal, bits);
 }
 
 void di_terminal_destroy(DiTerminal *terminal) {
     // Disconnect all wires first, please!
     assert(!terminal->node);
 
-    if (terminal->holding) {
-        di_signal_destroy(&terminal->signal);
-    }
+    di_signal_destroy(&terminal->signal);
 }
 
-void di_terminal_write(DiTerminal *terminal, DiSignal move_signal, DiSimulation *simulation) {
-    assert(move_signal.bits == terminal->bits);
+void di_terminal_write(DiTerminal *terminal, DiSignal *signal, DiSimulation *simulation) {
+    assert(signal->bits == terminal->bits);
 
-    if (terminal->holding) {
-        di_signal_destroy(&terminal->signal);
-    }
+    di_signal_copy(&terminal->signal, signal);
 
+    di_terminal_send(terminal, simulation);
+}
+
+void di_terminal_send(DiTerminal *terminal, DiSimulation *simulation) {
     terminal->holding = true;
-    terminal->signal = move_signal;
 
     if (terminal->node) {
         di_node_changed(terminal->node, simulation);
@@ -51,21 +50,23 @@ void di_terminal_reset(DiTerminal *terminal, DiSimulation *simulation) {
 }
 
 void di_terminal_fill(DiTerminal *terminal, DiBit bit, DiSimulation *simulation) {
-    di_terminal_write(terminal, di_signal_filled(terminal->bits, bit), simulation);
+    di_signal_fill(&terminal->signal, bit);
+
+    di_terminal_send(terminal, simulation);
 }
 
 DiSignal *di_terminal_read(DiTerminal *terminal) {
-    if (!terminal->node)
-        return NULL;
-
-    DiTerminal *wire = terminal->node->hold;
-
-    if (!wire) {
-        return NULL;
+    // Return the value of the connected wire if connected.
+    if (terminal->node) {
+        return &terminal->node->signal;
     }
 
-    assert(wire->holding);
-    assert(terminal->bits == wire->signal.bits);
+    // Otherwise, we will return the local signal value.
+    // If the terminal is being held we can't modify our internal signal value, so we can just return it.
+    // Otherwise, we should initialize it to something consistent DI_BIT_UNKNOWN.
+    if (!terminal->holding) {
+        di_signal_fill(&terminal->signal, DI_BIT_UNKNOWN);
+    }
 
-    return &wire->signal;
+    return &terminal->signal;
 }

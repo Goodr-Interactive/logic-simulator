@@ -1,9 +1,9 @@
-#include <digisim/elements/and.h>
+#include <digisim/elements/xnor.h>
 
 #include <digisim/node.h>
 
-void di_and_changed(DiElement *component, DiSimulation *simulation) {
-    DiAnd *self = (DiAnd *)component;
+void di_xnor_changed(DiElement *component, DiSimulation *simulation) {
+    DiXnor *self = (DiXnor *)component;
 
     DiSignal *in_a = di_terminal_read(&self->input_a);
     DiSignal *in_b = di_terminal_read(&self->input_b);
@@ -25,7 +25,7 @@ void di_and_changed(DiElement *component, DiSimulation *simulation) {
     for (size_t a = 0; a < self->bits; a++) {
         size_t error = in_a_error[a] | in_b_error[a];
         size_t unknown = in_a_unknown[a] & in_b_unknown[a];
-        size_t value = (in_a_values[a] & in_b_values[a]) & ~error;
+        size_t value = ~(in_a_values[a] ^ in_b_values[a]) & ~error;
 
         output_error[a] = error;
         output_unknown[a] = unknown;
@@ -35,10 +35,10 @@ void di_and_changed(DiElement *component, DiSimulation *simulation) {
     di_terminal_send(&self->output, simulation);
 }
 
-void di_and_init(DiAnd *self, size_t bits) {
+void di_xnor_init(DiXnor *self, size_t bits) {
     di_element_init(&self->element);
 
-    self->element.changed = di_and_changed;
+    self->element.changed = di_xnor_changed;
 
     self->bits = bits;
 
@@ -48,7 +48,7 @@ void di_and_init(DiAnd *self, size_t bits) {
     di_terminal_init(&self->output, &self->element, bits);
 }
 
-void di_and_destroy(DiAnd *self) {
+void di_xnor_destroy(DiXnor *self) {
     di_terminal_destroy(&self->input_a);
     di_terminal_destroy(&self->input_b);
     di_terminal_destroy(&self->output);

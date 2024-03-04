@@ -4,7 +4,7 @@ Astable::Astable() {
     di_input_init(&input, 1);
 
     for (size_t a = 0; a < 3; a++) {
-        di_node_init(&nodes[a]);
+        di_node_init(&nodes[a], 1);
         di_not_init(&gates[a], 1);
     }
 
@@ -28,5 +28,4 @@ Astable::~Astable() {
     }
 
     di_input_destroy(&input);
-
 }

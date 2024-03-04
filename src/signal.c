@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Bitmask to ignore bits that aren't part of this signal
+#define DI_SIGNAL_TOP_BIT_MASK(bits) (~((~(uint64_t)0) << bits))
+
 DiBit di_bit_logical(bool value) {
     if (value) {
         return DI_BIT_HIGH;
@@ -102,11 +105,31 @@ bool di_signal_equal(DiSignal *signal, DiSignal *other) {
         return false;
     }
 
+    if (signal->bits == 0) {
+        return true;
+    }
+
+    size_t body_count = signal->bits / DI_SIGNAL_BITS_PER_U64;
+    size_t top_bits = signal->bits % DI_SIGNAL_BITS_PER_U64;
+    size_t body_u64_size = body_count * sizeof(uint64_t);
+
     // Assuming unused bits are zero.
     uint64_t *signal_values = di_signal_get_values(signal);
-    uint64_t *other_values = di_signal_get_values(other);
+    uint64_t *signal_error = di_signal_get_error(signal);
+    uint64_t *signal_unknown = di_signal_get_unknown(signal);
 
-    return memcmp(signal_values, other_values, sizeof(uint64_t) * DI_SIGNAL_U64_ALLOC(signal->bits)) == 0;
+    uint64_t *other_values = di_signal_get_values(other);
+    uint64_t *other_error = di_signal_get_error(other);
+    uint64_t *other_unknown = di_signal_get_unknown(other);
+
+    uint64_t mask = DI_SIGNAL_TOP_BIT_MASK(top_bits);
+
+    return memcmp(signal_values, other_values, body_u64_size) == 0 &&
+           (signal_values[body_count] & mask) == (other_values[body_count] & mask) &&
+           memcmp(signal_error, other_error, body_u64_size) == 0 &&
+           (signal_error[body_count] & mask) == (other_error[body_count] & mask) &&
+           memcmp(signal_unknown, other_unknown, body_u64_size) == 0 &&
+           (signal_unknown[body_count] & mask) == (other_unknown[body_count] & mask);
 }
 
 void di_signal_copy(DiSignal *signal, DiSignal *source) {

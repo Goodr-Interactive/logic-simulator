@@ -81,6 +81,11 @@ bool di_node_list_add(DiNodeList *list, DiNode *value);
  */
 bool di_node_list_remove(DiNodeList *list, DiNode *value);
 
+void di_node_list_clear(DiNodeList *list);
+
+void di_node_list_init(DiNodeList *list);
+void di_node_list_destroy(DiNodeList *list);
+
 typedef struct di_element_t DiElement;
 typedef struct di_simulation_t DiSimulation;
 

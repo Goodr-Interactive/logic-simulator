@@ -11,11 +11,11 @@ extern "C" {
 #include <optional>
 
 struct UnaryGate {
-    DiInput a;
-    DiOutput f;
+    DiInput a{};
+    DiOutput f{};
 
-    DiNode aToGate;
-    DiNode gateToF;
+    DiNode aToGate{};
+    DiNode gateToF{};
 
     void setInput(DiSimulation *simulation, DiBit value);
 

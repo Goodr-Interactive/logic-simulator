@@ -4,31 +4,47 @@ project(digisim LANGUAGES C CXX)
 add_subdirectory(external)
 
 add_library(digisim
-    include/digisim/element.h
     include/digisim/node.h
+    include/digisim/signal.h
+    include/digisim/element.h
+    include/digisim/terminal.h
+    include/digisim/simulation.h
+    include/digisim/simulations/unit-delay.h
+    include/digisim/simulations/zero-delay.h
+    include/digisim/elements/all.h
+    include/digisim/elements/not.h
     include/digisim/elements/and.h
     include/digisim/elements/or.h
-    include/digisim/elements/all.h
+    include/digisim/elements/nand.h
+    include/digisim/elements/xor.h
+    include/digisim/elements/xnor.h
+    include/digisim/elements/nor.h
     include/digisim/elements/input.h
     include/digisim/elements/output.h
+    include/digisim/elements/buffer.h
+    include/digisim/elements/d-latch.h
     include/digisim/elements/sr-latch.h
     include/digisim/elements/multiplexer.h
     include/digisim/elements/demultiplexer.h
-    include/digisim/elements/not.h
-    include/digisim/terminal.h
-    include/digisim/signal.h
-    include/digisim/simulation.h
 
-    src/element.c
     src/node.c
-    src/terminal.c
     src/signal.c
+    src/element.c
+    src/terminal.c
     src/simulation.c
+    src/simulations/unit-delay.c
+    src/simulations/zero-delay.c
     src/elements/and.c
     src/elements/or.c
+    src/elements/nand.c
+    src/elements/nor.c
+    src/elements/xor.c
+    src/elements/xnor.c
     src/elements/input.c
     src/elements/not.c
     src/elements/output.c
+    src/elements/buffer.c
+    src/elements/d-latch.c
     src/elements/sr-latch.c
     src/elements/multiplexer.c
     src/elements/demultiplexer.c

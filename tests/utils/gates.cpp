@@ -2,18 +2,14 @@
 
 #include <optional>
 
-void UnaryGate::setInput(DiSimulation *simulation, DiBit value) {
-    di_input_set_bit(&a, 0, value, simulation);
-}
+void UnaryGate::setInput(DiSimulation *simulation, DiBit value) { di_input_set_bit(&a, 0, value, simulation); }
 
 std::optional<DiBit> UnaryGate::simulate(DiBit inputValue) {
-    DiSimulation simulation;
+    DiSimulation *simulation = di_simulation_create();
 
-    di_simulation_init(&simulation);
+    std::optional<DiBit> outputValue = simulate(simulation, inputValue);
 
-    std::optional<DiBit> outputValue = simulate(&simulation, inputValue);
-
-    di_simulation_destroy(&simulation);
+    di_simulation_free(simulation);
 
     return outputValue;
 }
@@ -34,8 +30,8 @@ UnaryGate::UnaryGate(DiTerminal *input, DiTerminal *output) {
     di_input_init(&a, 1);
     di_output_init(&f, 1);
 
-    di_node_init(&aToGate);
-    di_node_init(&gateToF);
+    di_node_init(&aToGate, 1);
+    di_node_init(&gateToF, 1);
 
     di_connect(&aToGate, &a.output);
     di_connect(&aToGate, input);
@@ -58,13 +54,11 @@ void BinaryGate::setInputs(DiSimulation *simulation, DiBit aValue, DiBit bValue)
 }
 
 std::optional<DiBit> BinaryGate::simulate(DiBit aValue, DiBit bValue) {
-    DiSimulation simulation;
+    DiSimulation *simulation = di_simulation_create();
 
-    di_simulation_init(&simulation);
+    std::optional<DiBit> outputValue = simulate(simulation, aValue, bValue);
 
-    std::optional<DiBit> outputValue = simulate(&simulation, aValue, bValue);
-
-    di_simulation_destroy(&simulation);
+    di_simulation_free(simulation);
 
     return outputValue;
 }
@@ -86,9 +80,9 @@ BinaryGate::BinaryGate(DiTerminal *first, DiTerminal *second, DiTerminal *output
     di_input_init(&b, 1);
     di_output_init(&f, 1);
 
-    di_node_init(&aToGate);
-    di_node_init(&bToGate);
-    di_node_init(&gateToF);
+    di_node_init(&aToGate, 1);
+    di_node_init(&bToGate, 1);
+    di_node_init(&gateToF, 1);
 
     di_connect(&aToGate, &a.output);
     di_connect(&aToGate, first);

@@ -3,24 +3,13 @@
 #include <assert.h>
 #include <stdlib.h>
 
-void di_demultiplexer_disconnect(DiDemultiplexer *demultiplexer, DiSimulation *simulation) {
-    for (size_t a = 0; a < demultiplexer->output_count; a++) {
-        di_terminal_reset(&demultiplexer->outputs[a], simulation);
-    }
-}
-
 void di_demultiplexer_changed(DiElement *element, DiSimulation *simulation) {
     DiDemultiplexer *demultiplexer = (DiDemultiplexer *)element;
 
     DiSignal *select_signal = di_terminal_read(&demultiplexer->select);
+    DiSignal *input_signal = di_terminal_read(&demultiplexer->input);
 
-    if (!select_signal) {
-        di_demultiplexer_disconnect(demultiplexer, simulation);
-
-        return;
-    }
-
-    assert(select_signal->bits < 64);
+    assert(select_signal->bits < 20);
 
     uint64_t *values = di_signal_get_values(select_signal);
     uint64_t *error = di_signal_get_error(select_signal);
@@ -28,21 +17,19 @@ void di_demultiplexer_changed(DiElement *element, DiSimulation *simulation) {
     uint64_t select = values[0];
 
     if (error[0] != 0 || unknown[0] != 0) {
-        di_demultiplexer_disconnect(demultiplexer, simulation);
+        for (size_t a = 0; a < demultiplexer->output_count; a++) {
+            di_terminal_fill(&demultiplexer->outputs[a], DI_BIT_ERROR, simulation);
+        }
 
         return;
     }
 
     for (size_t a = 0; a < demultiplexer->output_count; a++) {
-        DiSignal output;
-
         if (a == select) {
-            di_signal_copy(&output, select_signal);
+            di_terminal_write(&demultiplexer->outputs[a], input_signal, simulation);
         } else {
-            di_signal_fill(&output, DI_BIT_LOW);
+            di_terminal_fill(&demultiplexer->outputs[a], DI_BIT_LOW, simulation);
         }
-
-        di_terminal_write(&demultiplexer->outputs[a], output, simulation);
     }
 }
 

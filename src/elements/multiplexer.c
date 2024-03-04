@@ -8,26 +8,14 @@ void di_multiplexer_changed(DiElement *element, DiSimulation *simulation) {
 
     DiSignal *select_signal = di_terminal_read(&multiplexer->select);
 
-    if (!select_signal) {
-        di_terminal_fill(&multiplexer->output, DI_BIT_ERROR, simulation);
-
-        return;
-    }
-
-    assert(select_signal->bits < 64);
+    assert(select_signal->bits < 20);
 
     uint64_t *values = di_signal_get_values(select_signal);
     uint64_t *error = di_signal_get_error(select_signal);
     uint64_t *unknown = di_signal_get_unknown(select_signal);
     uint64_t select = values[0];
 
-    if (error[0] != 0 || unknown[0] != 0) {
-        di_terminal_fill(&multiplexer->output, DI_BIT_ERROR, simulation);
-
-        return;
-    }
-
-    if (select >= multiplexer->input_count) {
+    if (error[0] != 0 || unknown[0] != 0 || select >= multiplexer->input_count) {
         di_terminal_fill(&multiplexer->output, DI_BIT_ERROR, simulation);
 
         return;
@@ -37,16 +25,7 @@ void di_multiplexer_changed(DiElement *element, DiSimulation *simulation) {
 
     DiSignal *signal = di_terminal_read(input_terminal);
 
-    if (!signal) {
-        di_terminal_fill(&multiplexer->output, DI_BIT_ERROR, simulation);
-
-        return;
-    }
-
-    DiSignal output;
-    di_signal_init_from(&output, signal);
-
-    di_terminal_write(&multiplexer->output, output, simulation);
+    di_terminal_write(&multiplexer->output, signal, simulation);
 }
 
 void di_multiplexer_init(DiMultiplexer *multiplexer, size_t data_bits, size_t select_bits) {

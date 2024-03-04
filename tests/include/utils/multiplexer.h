@@ -33,5 +33,4 @@ struct Multiplexer {
     ~Multiplexer();
 };
 
-
 #endif // DIGISIM_MULTIPLEXER_H

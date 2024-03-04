@@ -10,6 +10,17 @@
 #include <stddef.h>
 
 typedef struct di_node_t DiNode;
+typedef struct di_simulation_t DiSimulation;
+
+/**
+ * Callback to add a node to a simulation.
+ */
+typedef void (*DiSimulationAddCallback)(DiSimulation *simulation, DiNode *node);
+
+/**
+ * Callback to run this simulation.
+ */
+typedef bool (*DiSimulationRunCallback)(DiSimulation *simulation, size_t max_depth);
 
 /**
  * Keeps track of simulation parameters and holds a queue of nodes to "propagate."
@@ -23,37 +34,15 @@ typedef struct di_node_t DiNode;
  */
 typedef struct di_simulation_t {
     /**
-     * The number of nodes in queue to simulate.
+     * Callback that's called when an element wants to propagate a wire value.
      */
-    size_t count;
+    DiSimulationAddCallback add;
 
     /**
-     * The capacity of the queue.
+     * Callback that's called by the user to start simulating.
      */
-    size_t capacity;
-
-    /**
-     * Index of the first DiNode * in queue to simulate.
-     *
-     * This is a circular buffer, so start is moved forward when a node is popped.
-     */
-    size_t start;
-
-    /**
-     * A heap allocated buffer containing all nodes in queue.
-     *
-     * Not all DiNodes are initialized, as the buffer is circular.
-     */
-    DiNode **buffer;
+    DiSimulationRunCallback run;
 } DiSimulation;
-
-/**
- * Propagates everything currently in the buffer, leaving all new changes created from this propagation in the queue.
- *
- * @memberof DiSimulation
- * @param simulation The simulation queue
- */
-void di_simulation_step(DiSimulation *simulation);
 
 /**
  * Propagates everything until the buffer is empty, or until `max_step` steps have been taken.
@@ -61,10 +50,10 @@ void di_simulation_step(DiSimulation *simulation);
  *
  * @memberof DiSimulation
  * @param simulation The simulation queue
- * @param max_step The maximum number of steps to take before quiting
+ * @param max_depth The maximum number of wires changes to pursue before quiting
  * @return True if `max_step`s have passed and the simulation has not settled
  */
-bool di_simulation_run(DiSimulation *simulation, size_t max_step);
+bool di_simulation_run(DiSimulation *simulation, size_t max_depth);
 
 /**
  * Adds a node to the propagation queue (to be simulated later).
@@ -76,19 +65,21 @@ bool di_simulation_run(DiSimulation *simulation, size_t max_step);
 void di_simulation_add(DiSimulation *simulation, DiNode *node);
 
 /**
- * Initialize a DiSimulation struct.
+ * Allocates and returns a pointer to a default simulation.
  *
- * @memberof DiSimulation
- * @param simulation Pointer to initialize
+ * By default this is the zero delay simulation (digisim/simulations/zero-delay.h).
+ *
+ * Free this pointer using di_simulation_free.
+ *
+ * @return A pointer to a DiSimulation object.
  */
-void di_simulation_init(DiSimulation *simulation);
+DiSimulation *di_simulation_create();
 
 /**
- * Destroy a DiSimulation struct.
+ * Frees a pointer created by `di_simulation_create`.
  *
- * @memberof DiSimulation
- * @param simulation Pointer to destroy
+ * @param simulation A pointer allocated by `di_simulation_create`.
  */
-void di_simulation_destroy(DiSimulation *simulation);
+void di_simulation_free(DiSimulation *simulation);
 
 #endif // DIGISIM_SIMULATION_H

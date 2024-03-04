@@ -17,12 +17,12 @@ SrLatch::SrLatch() {
     di_not_init(&firstNegate, 1);
     di_not_init(&secondNegate, 1);
 
-    di_node_init(&setToFirst);
-    di_node_init(&resetToSecond);
-    di_node_init(&firstToFirstNegate);
-    di_node_init(&secondToSecondNegate);
-    di_node_init(&firstNegateToSecond);
-    di_node_init(&secondNegateToFirst);
+    di_node_init(&setToFirst, 1);
+    di_node_init(&resetToSecond, 1);
+    di_node_init(&firstToFirstNegate, 1);
+    di_node_init(&secondToSecondNegate, 1);
+    di_node_init(&firstNegateToSecond, 1);
+    di_node_init(&secondNegateToFirst, 1);
 
     di_connect(&setToFirst, &set.output);
     di_connect(&setToFirst, &first.input_a);

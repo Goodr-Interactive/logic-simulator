@@ -1,4 +1,4 @@
-#include "digisim/elements/sr-latch.h"
+#include <digisim/elements/sr-latch.h>
 
 #include <stdlib.h>
 
@@ -8,8 +8,7 @@ void di_sr_latch_changed(DiElement *element, DiSimulation *simulation) {
     DiSignal *in_set = di_terminal_read(&self->set);
     DiSignal *in_reset = di_terminal_read(&self->reset);
 
-    DiSignal output;
-    di_signal_init(&output, self->bits);
+    DiSignal *output = &self->value.signal;
 
     for (size_t a = 0; a < self->bits; a++) {
         bool set = di_bit_value(di_signal_get(in_set, a), false);
@@ -23,10 +22,10 @@ void di_sr_latch_changed(DiElement *element, DiSimulation *simulation) {
             self->state[a] = false;
         }
 
-        di_signal_set(&output, a, self->state[a]);
+        di_signal_set(output, a, self->state[a]);
     }
 
-    di_terminal_write(&self->value, output, simulation);
+    di_terminal_send(&self->value, simulation);
 }
 
 void di_sr_latch_init(DiSrLatch *latch, size_t bits) {
@@ -46,6 +45,6 @@ void di_sr_latch_destroy(DiSrLatch *latch) {
     di_element_destroy(&latch->element);
 
     di_terminal_destroy(&latch->set);
-    di_terminal_destroy(&latch->set);
-    di_terminal_destroy(&latch->set);
+    di_terminal_destroy(&latch->reset);
+    di_terminal_destroy(&latch->value);
 }

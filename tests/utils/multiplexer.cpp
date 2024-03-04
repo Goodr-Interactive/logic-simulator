@@ -41,13 +41,13 @@ Multiplexer::Multiplexer() {
     di_or_init(&sum, 1);
     di_output_init(&f, 1);
 
-    di_node_init(&aToAnd1);
-    di_node_init(&cToAnd2);
-    di_node_init(&bToGates);
-    di_node_init(&flipToAnd2);
-    di_node_init(&and1ToSum);
-    di_node_init(&and2ToSum);
-    di_node_init(&sumToF);
+    di_node_init(&aToAnd1, 1);
+    di_node_init(&cToAnd2, 1);
+    di_node_init(&bToGates, 1);
+    di_node_init(&flipToAnd2, 1);
+    di_node_init(&and1ToSum, 1);
+    di_node_init(&and2ToSum, 1);
+    di_node_init(&sumToF, 1);
 
     connect();
 }

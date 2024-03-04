@@ -53,6 +53,7 @@ typedef struct di_terminal_t {
 /**
  * Initialize a DiTerminal struct.
  *
+ * @memberof DiTerminal
  * @param terminal Pointer to initialize
  * @param parent The element that owns this terminal
  * @param bits Number of bits for the terminal
@@ -62,6 +63,7 @@ void di_terminal_init(DiTerminal *terminal, DiElement *parent, size_t bits);
 /**
  * Destroy a DiTerminal struct.
  *
+ * @memberof DiTerminal
  * @param terminal Pointer to destroy
  */
 void di_terminal_destroy(DiTerminal *terminal);
@@ -69,15 +71,31 @@ void di_terminal_destroy(DiTerminal *terminal);
 /**
  * Writes a value to this terminal (holds the connected wire to a value).
  *
+ * @memberof DiTerminal
  * @param terminal The terminal to hold
- * @param move_signal The value to output
+ * @param signal The value to output
  * @param simulation The simulation that will propagate this change
  */
-void di_terminal_write(DiTerminal *terminal, DiSignal move_signal, DiSimulation *simulation);
+void di_terminal_write(DiTerminal *terminal, DiSignal *signal, DiSimulation *simulation);
+
+/**
+ * Holds the terminal to the value in `terminal->signal`.
+ *
+ * Callers should first write to `terminal->signal`,
+ * and then call this method to propagate an event to the connected wire.
+ *
+ * A terminal can stop holding a value to a wire using di_terminal_reset.
+ *
+ * @memberof DiTerminal
+ * @param terminal The terminal to send a value
+ * @param simulation The simulation to propagate the value change
+ */
+void di_terminal_send(DiTerminal *terminal, DiSimulation *simulation);
 
 /**
  * Stops a terminal from holding a value from a wire (switches to "read" or "inactive" mode).
  *
+ * @memberof DiTerminal
  * @param terminal The terminal to reset
  * @param simulation The simulation that will propagate this change
  */
@@ -87,6 +105,7 @@ void di_terminal_reset(DiTerminal *terminal, DiSimulation *simulation);
  * Writes a value of all bit to this terminal.
  * Equivalent to di_terminal_write with di_signal_filled.
  *
+ * @memberof DiTerminal
  * @param terminal The terminal to write
  * @param bit The bit to fill the signal with
  * @param simulation The simulation that will propagate this change
@@ -96,8 +115,10 @@ void di_terminal_fill(DiTerminal *terminal, DiBit bit, DiSimulation *simulation)
 /**
  * Reads a value from the terminal.
  * If the connected wire is being held to a value by another terminal, then a DiSignal will be returned.
- * Otherwise, NULL is returned if there is no connected wire or the wire is not being held to a value.
+ * Otherwise, if the terminal is currently being held to a value, that is returned.
+ * Otherwise, the `signal` field is cleared to DI_BIT_UNKNOWN and that is returned.
  *
+ * @memberof DiTerminal
  * @param terminal The terminal to read from
  * @return The value of the terminal (or NULL if unconnected)
  */

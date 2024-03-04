@@ -67,6 +67,8 @@ bool di_node_list_add(DiNodeList *list, DiNode *value) {
     return true;
 }
 
+void di_node_list_clear(DiNodeList *list) { list->count = 0; }
+
 bool di_node_list_remove(DiNodeList *list, DiNode *value) {
     DiNode **values = di_node_list_values(list);
 

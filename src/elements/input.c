@@ -24,10 +24,9 @@ void di_input_destroy(DiInput *input) {
 }
 
 void di_input_emit(DiInput *input, DiSimulation *simulation) {
-    DiSignal copy;
-    di_signal_init_from(&copy, &input->signal);
+    di_signal_copy(&input->output.signal, &input->signal);
 
-    di_terminal_write(&input->output, copy, simulation);
+    di_terminal_send(&input->output, simulation);
 }
 
 DiBit di_input_get_bit(DiInput *input, size_t index) { return di_signal_get(&input->signal, index); }
