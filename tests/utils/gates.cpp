@@ -32,8 +32,8 @@ UnaryGate::UnaryGate(DiTerminal *input, DiTerminal *output) {
     di_input_init(&a, 1);
     di_output_init(&f, 1);
 
-    di_node_init(&aToGate);
-    di_node_init(&gateToF);
+    di_node_init(&aToGate, 1);
+    di_node_init(&gateToF, 1);
 
     di_connect(&aToGate, &a.output);
     di_connect(&aToGate, input);
@@ -82,9 +82,9 @@ BinaryGate::BinaryGate(DiTerminal *first, DiTerminal *second, DiTerminal *output
     di_input_init(&b, 1);
     di_output_init(&f, 1);
 
-    di_node_init(&aToGate);
-    di_node_init(&bToGate);
-    di_node_init(&gateToF);
+    di_node_init(&aToGate, 1);
+    di_node_init(&bToGate, 1);
+    di_node_init(&gateToF, 1);
 
     di_connect(&aToGate, &a.output);
     di_connect(&aToGate, first);

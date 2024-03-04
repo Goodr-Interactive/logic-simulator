@@ -5,24 +5,29 @@
 void di_not_changed(DiElement *component, DiSimulation *simulation) {
     DiNot *self = (DiNot *)component;
 
-    DiSignal *signal = di_terminal_read(&self->input);
+    DiSignal *in = di_terminal_read(&self->input);
 
-    if (!signal) {
-        di_terminal_fill(&self->output, DI_BIT_ERROR, simulation);
+    DiSignal *output = &self->output.signal;
 
-        return;
-    }
+    uint64_t *output_values = di_signal_get_values(output);
+    uint64_t *output_error = di_signal_get_error(output);
+    uint64_t *output_unknown = di_signal_get_unknown(output);
 
-    DiSignal output;
-    di_signal_init(&output, self->bits);
+    uint64_t *in_values = di_signal_get_values(in);
+    uint64_t *in_error = di_signal_get_error(in);
+    uint64_t *in_unknown = di_signal_get_unknown(in);
 
     for (size_t a = 0; a < self->bits; a++) {
-        bool value = di_bit_value(di_signal_get(signal, a), false);
+        size_t error = in_error[a];
+        size_t unknown = in_unknown[a];
+        size_t value = ~in_values[a] & ~error;
 
-        di_signal_set(&output, a, di_bit_logical(!value));
+        output_error[a] = error;
+        output_unknown[a] = unknown;
+        output_values[a] = value;
     }
 
-    di_terminal_write(&self->output, output, simulation);
+    di_terminal_send(&self->output, simulation);
 }
 
 void di_not_init(DiNot *self, size_t bits) {

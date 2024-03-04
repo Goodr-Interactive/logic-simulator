@@ -32,82 +32,40 @@ void di_node_connections_alloc(DiNodeConnections *list, size_t new_capacity) {
 }
 
 void di_node_changed(DiNode *node, DiSimulation *simulation) {
-    node->hold = NULL;
-
     DiTerminal **values = di_node_connections_values(&node->connections);
 
-    size_t bits = 0;
+    di_signal_copy(&node->last_signal, &node->signal);
 
-    bool failed = false;
-    DiTerminal *hold = NULL;
+    di_signal_fill(&node->signal, DI_BIT_UNKNOWN);
+
+    uint64_t *signal_values = di_signal_get_values(&node->signal);
+    uint64_t *signal_error = di_signal_get_error(&node->signal);
+    uint64_t *signal_unknown = di_signal_get_unknown(&node->signal);
 
     for (size_t a = 0; a < node->connections.count; a++) {
-        if (bits == 0) {
-            bits = values[a]->bits;
+        DiTerminal *terminal = values[a];
+
+        if (!terminal->holding) {
+            continue;
         }
 
-        assert(values[a]->bits == bits);
+        uint64_t *terminal_values = di_signal_get_values(&terminal->signal);
+        uint64_t *terminal_error = di_signal_get_error(&terminal->signal);
+        uint64_t *terminal_unknown = di_signal_get_unknown(&terminal->signal);
 
-        if (values[a]->holding) {
-            if (hold) {
-                failed = true;
-                break;
-            } else {
-                hold = values[a];
-            }
+        for (size_t i = 0; i < DI_SIGNAL_U64_COUNT(node->bits); i++) {
+            uint64_t error = signal_error[i] | terminal_error[i]
+                | (~(signal_unknown[i] | terminal_unknown[i]) & (signal_values[i] ^ terminal_values[i]));
+            uint64_t unknown = signal_unknown[i] & terminal_unknown[i] & ~error;
+            uint64_t value = signal_values[i] | terminal_values[i] & ~error;
+
+            signal_values[i] = value;
+            signal_error[i] = error;
+            signal_unknown[i] = unknown;
         }
     }
 
-    // Becomes error, clear signal and re-simulate.
-    if (failed) {
-        if (node->has_signal) {
-            di_signal_destroy(&node->signal);
-        }
-
-        // Changed.
-        if (!node->error) {
-            di_simulation_add(simulation, node);
-        }
-
-        node->error = true;
-        node->hold = NULL;
-        node->has_signal = false;
-
-        return;
-    }
-
-    // assert !failed
-
-    node->hold = hold;
-    node->error = false;
-
-    bool re_simulate = false;
-
-    if (hold) {
-        // By selection.
-        assert(hold->holding);
-
-        re_simulate = !node->has_signal;
-
-        if (node->has_signal) {
-            re_simulate = re_simulate || !di_signal_equal(&node->signal, &hold->signal);
-
-            di_signal_destroy(&node->signal);
-        }
-
-        node->has_signal = true;
-        di_signal_init_from(&node->signal, &hold->signal);
-    } else {
-        if (node->has_signal) {
-            di_signal_destroy(&node->signal);
-
-            re_simulate = true;
-        }
-
-        node->has_signal = false;
-    }
-
-    if (re_simulate) {
+    if (!di_signal_equal(&node->signal, &node->last_signal)) {
         di_simulation_add(simulation, node);
     }
 }
@@ -117,7 +75,7 @@ void di_node_propagate(DiNode *node, DiSimulation *simulation) {
 
     for (size_t a = 0; a < node->connections.count; a++) {
         // Ignore holding connection (we don't need to send it back!)
-        if (values[a] == node->hold) {
+        if (values[a]->holding) {
             continue;
         }
 
@@ -199,17 +157,25 @@ void di_node_connections_destroy(DiNodeConnections *list, DiNode *node) {
     }
 }
 
-void di_node_init(DiNode *node) {
-    node->hold = NULL;
+void di_node_init(DiNode *node, size_t bits) {
+    node->bits = bits;
 
-    memset(&node->signal, 0, sizeof(DiSignal));
+    node->signal = di_signal_filled(bits, DI_BIT_UNKNOWN);
+    node->last_signal = di_signal_filled(bits, DI_BIT_UNKNOWN);
+
     di_node_connections_init(&node->connections);
 }
 
-void di_node_destroy(DiNode *node) { di_node_connections_destroy(&node->connections, node); }
+void di_node_destroy(DiNode *node) {
+    di_signal_destroy(&node->signal);
+    di_signal_destroy(&node->last_signal);
+
+    di_node_connections_destroy(&node->connections, node);
+}
 
 void di_connect_simulate(DiNode *node, DiTerminal *connection, DiSimulation *simulation) {
     assert(!connection->node || connection->node == node);
+    assert(connection->bits == node->bits);
 
     connection->node = node;
     di_node_connections_add(&node->connections, connection);

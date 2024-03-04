@@ -8,23 +8,31 @@ void di_or_changed(DiElement *component, DiSimulation *simulation) {
     DiSignal *in_a = di_terminal_read(&self->input_a);
     DiSignal *in_b = di_terminal_read(&self->input_b);
 
-    if (!in_a || !in_b) {
-        di_terminal_fill(&self->output, DI_BIT_LOW, simulation);
+    DiSignal *output = &self->output.signal;
 
-        return;
-    }
+    uint64_t *output_values = di_signal_get_values(output);
+    uint64_t *output_error = di_signal_get_error(output);
+    uint64_t *output_unknown = di_signal_get_unknown(output);
 
-    DiSignal output;
-    di_signal_init(&output, self->bits);
+    uint64_t *in_a_values = di_signal_get_values(in_a);
+    uint64_t *in_a_error = di_signal_get_error(in_a);
+    uint64_t *in_a_unknown = di_signal_get_unknown(in_a);
+
+    uint64_t *in_b_values = di_signal_get_values(in_b);
+    uint64_t *in_b_error = di_signal_get_error(in_b);
+    uint64_t *in_b_unknown = di_signal_get_unknown(in_b);
 
     for (size_t a = 0; a < self->bits; a++) {
-        bool lhs = di_bit_value(di_signal_get(in_a, a), false);
-        bool rhs = di_bit_value(di_signal_get(in_b, a), false);
+        size_t error = in_a_error[a] | in_b_error[a];
+        size_t unknown = in_a_unknown[a] & in_b_unknown[a];
+        size_t value = (in_a_values[a] | in_b_values[a]) & ~error;
 
-        di_signal_set(&output, a, di_bit_logical(lhs || rhs));
+        output_error[a] = error;
+        output_unknown[a] = unknown;
+        output_values[a] = value;
     }
 
-    di_terminal_write(&self->output, output, simulation);
+    di_terminal_send(&self->output, simulation);
 }
 
 void di_or_init(DiOr *self, size_t bits) {

@@ -73,7 +73,9 @@ void di_terminal_destroy(DiTerminal *terminal);
  * @param move_signal The value to output
  * @param simulation The simulation that will propagate this change
  */
-void di_terminal_write(DiTerminal *terminal, DiSignal move_signal, DiSimulation *simulation);
+void di_terminal_write(DiTerminal *terminal, DiSignal *signal, DiSimulation *simulation);
+
+void di_terminal_send(DiTerminal *terminal, DiSimulation *simulation);
 
 /**
  * Stops a terminal from holding a value from a wire (switches to "read" or "inactive" mode).
@@ -96,7 +98,8 @@ void di_terminal_fill(DiTerminal *terminal, DiBit bit, DiSimulation *simulation)
 /**
  * Reads a value from the terminal.
  * If the connected wire is being held to a value by another terminal, then a DiSignal will be returned.
- * Otherwise, NULL is returned if there is no connected wire or the wire is not being held to a value.
+ * Otherwise, if the terminal is currently being held to a value, that is returned.
+ * Otherwise, the `signal` field is cleared to DI_BIT_UNKNOWN and that is returned.
  *
  * @param terminal The terminal to read from
  * @return The value of the terminal (or NULL if unconnected)

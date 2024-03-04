@@ -12,7 +12,8 @@ add_executable(digisim-tests
     test_multiplexer.cpp
     test_gates.cpp
     test_simulation_stress.cpp
-    test_ordering.cpp)
+    test_ordering.cpp
+)
 
 set_target_properties(digisim-tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 target_link_libraries(digisim-tests PUBLIC digisim Catch2::Catch2WithMain)

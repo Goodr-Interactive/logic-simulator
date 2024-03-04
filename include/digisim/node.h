@@ -67,24 +67,7 @@ typedef struct di_node_t {
      */
     DiNodeConnections connections;
 
-    /**
-     * If true, multiple terminals are outputting a value onto this wire.
-     */
-    bool error;
-
-    /**
-     * If non-null, points to the connected terminal that is holding the wire to a value.
-     *
-     * Typically, this is non-null IFF `has_signal` is true.
-     */
-    DiTerminal *hold;
-
-    /**
-     * If true, then `signal` is initialized, meaning one terminal is holding this wire to a value.
-     *
-     * The value of the wire can be found in `signal`.
-     */
-    bool has_signal; // available if !error && hold
+    size_t bits;
 
     /**
      * The value that this wire is held to.
@@ -92,6 +75,8 @@ typedef struct di_node_t {
      * Only read this value if `has_signal` is true.
      */
     DiSignal signal;
+
+    DiSignal last_signal;
 } DiNode;
 
 /**
@@ -100,7 +85,7 @@ typedef struct di_node_t {
  * @memberof DiNode
  * @param node Pointer to initialize
  */
-void di_node_init(DiNode *node);
+void di_node_init(DiNode *node, size_t bits);
 
 /**
  * Destroy a DiNode struct.

@@ -34,9 +34,6 @@ TEST_CASE("Test SR Latch Ordering") {
 
     REQUIRE(!dead);
 
-    REQUIRE(latch.firstToFirstNegate.has_signal);
-    REQUIRE(latch.secondToSecondNegate.has_signal);
-
     DiBit firstBit = di_signal_get(&latch.firstToFirstNegate.signal, 0);
     DiBit secondBit = di_signal_get(&latch.secondToSecondNegate.signal, 0);
 
