@@ -9,7 +9,7 @@ void di_and_changed(DiElement *component, DiSimulation *simulation) {
     DiSignal *in_b = di_terminal_read(&self->input_b);
 
     if (!in_a || !in_b) {
-        di_terminal_reset(&self->output, simulation);
+        di_terminal_fill(&self->output, DI_BIT_LOW, simulation);
 
         return;
     }

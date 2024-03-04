@@ -8,7 +8,7 @@ void di_not_changed(DiElement *component, DiSimulation *simulation) {
     DiSignal *signal = di_terminal_read(&self->input);
 
     if (!signal) {
-        di_terminal_reset(&self->output, simulation);
+        di_terminal_fill(&self->output, DI_BIT_ERROR, simulation);
 
         return;
     }

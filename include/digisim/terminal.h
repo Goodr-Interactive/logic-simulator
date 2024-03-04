@@ -84,6 +84,16 @@ void di_terminal_write(DiTerminal *terminal, DiSignal move_signal, DiSimulation 
 void di_terminal_reset(DiTerminal *terminal, DiSimulation *simulation);
 
 /**
+ * Writes a value of all bit to this terminal.
+ * Equivalent to di_terminal_write with di_signal_filled.
+ *
+ * @param terminal The terminal to write
+ * @param bit The bit to fill the signal with
+ * @param simulation The simulation that will propagate this change
+ */
+void di_terminal_fill(DiTerminal *terminal, DiBit bit, DiSimulation *simulation);
+
+/**
  * Reads a value from the terminal.
  * If the connected wire is being held to a value by another terminal, then a DiSignal will be returned.
  * Otherwise, NULL is returned if there is no connected wire or the wire is not being held to a value.
