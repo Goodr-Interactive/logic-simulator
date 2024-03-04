@@ -10,6 +10,7 @@
 #include <digisim/elements/input.h>
 #include <digisim/elements/not.h>
 #include <digisim/elements/or.h>
+#include <digisim/elements/buffer.h>
 #include <digisim/elements/multiplexer.h>
 #include <digisim/elements/demultiplexer.h>
 #include <digisim/elements/sr-latch.h>

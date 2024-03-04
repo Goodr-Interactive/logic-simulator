@@ -21,6 +21,7 @@ add_library(digisim
     include/digisim/elements/nor.h
     include/digisim/elements/input.h
     include/digisim/elements/output.h
+    include/digisim/elements/buffer.h
     include/digisim/elements/d-latch.h
     include/digisim/elements/sr-latch.h
     include/digisim/elements/multiplexer.h
@@ -42,6 +43,7 @@ add_library(digisim
     src/elements/input.c
     src/elements/not.c
     src/elements/output.c
+    src/elements/buffer.c
     src/elements/d-latch.c
     src/elements/sr-latch.c
     src/elements/multiplexer.c
