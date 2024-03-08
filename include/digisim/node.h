@@ -7,51 +7,13 @@
 #define DIGISIM_NODE_H
 
 #include <digisim/signal.h>
+#include <digisim/utility/terminal-list.h>
 
 #include <stdbool.h>
 #include <stddef.h>
 
-/**
- * Locally kept capacity for DiNodeConnections.
- */
-#define DI_NODE_CONNECTIONS_SMALL_SIZE 4
-
 typedef struct di_terminal_t DiTerminal;
 typedef struct di_simulation_t DiSimulation;
-
-/**
- * Keeps track of all connections to this node.
- *
- * DiTerminals on this list are propagated to when a node changes value.
- */
-typedef struct di_node_connections_t {
-    /**
-     * The number of terminals currently connected to the node.
-     */
-    size_t count;
-
-    /**
-     * The number of terminals that can be stored in this list at this moment (either `local` or `heap`).
-     */
-    size_t capacity;
-
-    /**
-     * If true, `heap` stores all connected terminals. Otherwise, local stores the terminals.
-     */
-    bool heap_alloc;
-
-    union {
-        /**
-         * Initial allocation for connected nodes, should be sufficient for most DiNodeConnections instances.
-         */
-        DiTerminal *local[DI_NODE_CONNECTIONS_SMALL_SIZE];
-
-        /**
-         * Heap allocation in case more than `DI_NODE_CONNECTIONS_SMALL_SIZE` connections are made.
-         */
-        DiTerminal **heap;
-    };
-} DiNodeConnections;
 
 /**
  * Represents a wire in a circuit, connecting multiple elements together.
@@ -65,7 +27,7 @@ typedef struct di_node_t {
     /**
      * Holds all terminals that are currently connected to the wire.
      */
-    DiNodeConnections connections;
+    DiTerminalList connections;
 
     /**
      * The number of bits carried by this wire.

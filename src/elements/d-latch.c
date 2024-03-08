@@ -23,6 +23,12 @@ void di_d_latch_changed(DiElement *element, DiSimulation *simulation) {
     di_terminal_send(&self->value, simulation);
 }
 
+void di_d_latch_reset(DiElement *element) {
+    DiDLatch *self = (DiDLatch *)element;
+
+
+}
+
 void di_d_latch_init(DiDLatch *latch, size_t bits) {
     di_element_init(&latch->element);
 

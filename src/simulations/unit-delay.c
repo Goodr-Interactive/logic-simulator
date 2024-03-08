@@ -45,6 +45,10 @@ bool di_unit_simulation_run(DiUnitSimulation *simulation, size_t max_step) {
     return step == max_step && simulation->count > 0;
 }
 
+void di_unit_simulation_clear(DiUnitSimulation *simulation) {
+    simulation->count = 0;
+}
+
 void di_unit_simulation_alloc(DiUnitSimulation *simulation, size_t capacity) {
     // Not using realloc here as I feel that I would have to use memmove (which
     // could potentially alloc anyway).
@@ -105,6 +109,12 @@ void di_unit_simulation_add_adapter(DiSimulation *simulation, DiNode *node) {
     di_unit_simulation_add(unit, node);
 }
 
+void di_unit_simulation_clear_adapter(DiSimulation *simulation) {
+    DiUnitSimulation *unit = (DiUnitSimulation *)simulation;
+
+    di_unit_simulation_clear(unit);
+}
+
 bool di_unit_simulation_run_adapter(DiSimulation *simulation, size_t max_steps) {
     DiUnitSimulation *unit = (DiUnitSimulation *)simulation;
 
@@ -113,6 +123,7 @@ bool di_unit_simulation_run_adapter(DiSimulation *simulation, size_t max_steps) 
 
 void di_unit_simulation_init(DiUnitSimulation *simulation) {
     simulation->simulation.add = di_unit_simulation_add_adapter;
+    simulation->simulation.clear = di_unit_simulation_clear_adapter;
     simulation->simulation.run = di_unit_simulation_run_adapter;
 
     simulation->count = 0;
