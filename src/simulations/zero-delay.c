@@ -72,10 +72,6 @@ void di_zero_simulation_alloc(DiZeroSimulation *simulation, size_t capacity) {
 }
 
 void di_zero_simulation_add(DiZeroSimulation *simulation, DiNode *node) {
-    if (!simulation) {
-        return;
-    }
-
     if (simulation->count >= simulation->capacity) {
         size_t new_capacity = simulation->capacity * 2;
 

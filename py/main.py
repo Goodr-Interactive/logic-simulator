@@ -1,0 +1,344 @@
+from logisim.project import LogisimProject
+from digisim import Simulation, Input, InsightElement, BIT_LOW, BIT_HIGH, BIT_ERROR, BIT_UNKNOWN
+from assemble import AssembledCircuit
+from lxml import etree
+import json
+
+from typing import Optional
+from argparse import ArgumentParser, Namespace, FileType
+
+
+def bit_to_bin_string(bit: int) -> str:
+    if bit == BIT_LOW:
+        return '0'
+
+    if bit == BIT_HIGH:
+        return '1'
+
+    if bit == BIT_ERROR:
+        return 'E'
+
+    if bit == BIT_UNKNOWN:
+        return 'U'
+
+    return 'X'
+
+def bin_string_to_bit(text: str) -> int:
+    if text == '0':
+        return BIT_LOW
+
+    if text == '1':
+        return BIT_HIGH
+
+    if text == 'E':
+        return BIT_ERROR
+
+    if text == 'U':
+        return BIT_UNKNOWN
+
+    return BIT_UNKNOWN
+
+
+def state_entry_to_bin_string(state: Optional[list[int]]) -> str:
+    if state is None:
+        return 'ASTABLE'
+    else:
+        return ''.join(bit_to_bin_string(v) for v in state)
+
+
+
+def parse_bin_string_to_state_entry(text: str) -> list[int]:
+    return [bin_string_to_bit(c) for c in text]
+
+
+def increment_state(state: list[list[bool]]) -> bool:
+    for i in reversed(range(len(state))):
+        element = state[i]
+
+        for k in reversed(range(len(element))):
+            if element[k] == BIT_HIGH:
+                element[k] = BIT_LOW
+            else:
+                element[k] = BIT_HIGH
+
+                return False
+
+    return True
+
+
+# State: List (number of simulations) of List (number of inputs) of List (number of bits)
+def state_to_col_table(header: list[str], state: list[list[Optional[list[int]]]]):
+    row_strings = []
+
+    for element in state:
+        row_strings.append([state_entry_to_bin_string(value) for value in element])
+
+    longest = [
+        max(max(len(row_strings[i][col]) for i in range(len(row_strings))), len(header[col]))
+
+        for col in range(len(header))
+    ]
+
+    top = ' | '.join(item.ljust(longest[i], ' ') for i, item in enumerate(header))
+    divider = '-' * len(top)
+
+    return '\n'.join([top, divider] + [
+        ' | '.join(item.rjust(longest[i], ' ') for i, item in enumerate(row))
+
+        for row in row_strings
+    ])
+
+
+def build_truth_table(args: Namespace):
+    project = LogisimProject(etree.parse(args.file))
+
+    if args.circuit is None:
+        circuit = project.circuits[project.main]
+    else:
+        circuit = project.circuits[args.circuit]
+
+    steps = 10000 if args.max_steps is None else args.max_steps
+
+    assemble = AssembledCircuit(circuit)
+
+    inputs = assemble.inputs()
+    outputs = assemble.outputs()
+
+    name_id = 0
+
+    header = []
+    entries = []
+
+    state = []
+
+    for name, value in inputs:
+        if name is None:
+            header.append(f'input_{name_id}')
+
+            name_id += 1
+        else:
+            header.append(name)
+
+        state.append([BIT_LOW] * value.bits())
+
+    for name, _ in outputs:
+        if name is None:
+            header.append(f'output_{name_id}')
+
+            name_id += 1
+        else:
+            header.append(name)
+
+    simulation = Simulation()
+
+    while True:
+        simulation.clear()
+
+        for i in range(len(inputs)):
+            _, value = inputs[i]
+            element = state[i]
+
+            for k in range(len(element)):
+                value.set(k, element[k])
+
+            value.emit(simulation)
+
+        dead = simulation.simulate(steps)
+
+        row: list[Optional[list[int]]] = [element.copy() for element in state]
+
+        for _, output in outputs:
+            if dead:
+                row.append(None)
+            else:
+                value = [output.get(i) for i in range(output.bits())]
+
+                row.append(value)
+
+        entries.append(row)
+
+        if increment_state(state):
+            break
+
+    if args.readable:
+        print(state_to_col_table(header, entries))
+    else:
+        print(json.dumps({
+            'pins': [
+                {
+                    'name': name,
+                    'kind': 'input' if i < len(inputs) else 'output'
+                }
+
+                for i, name in enumerate(header)
+            ],
+            'values': [
+                {
+                    header[i]: state_entry_to_bin_string(value)
+
+                    for i, value in enumerate(row)
+                }
+
+                for row in entries
+            ]
+        }))
+
+
+def build_waveform(args: Namespace):
+    project = LogisimProject.parse(args.file)
+
+    if args.circuit is None:
+        circuit = project.circuits[project.main]
+    else:
+        circuit = project.circuits[args.circuit]
+
+    steps = 10000 if args.max_steps is None else args.max_steps
+
+    assemble = AssembledCircuit(circuit)
+
+    wave_file = json.load(args.waveform)
+
+    waveform = wave_file['waveform']
+    requests = wave_file.get('request', [])
+    clock = wave_file.get('clock')
+
+    if clock is not None:
+        value = assemble.by_label.get(clock)
+
+        if not value or not isinstance(value, Input) or value.bits() != 1:
+            print(f'Component {clock} does not exist or is not an input that can be clocked.')
+
+            return
+
+        clock = value
+
+    simulation = Simulation()
+
+    results = []
+
+    for row in waveform:
+        additional_requests = []
+
+        for key, value in row.items():
+            if value == 'request':
+                additional_requests.append(key)
+            else:
+                state = parse_bin_string_to_state_entry(value)
+
+                value = assemble.by_label.get(key)
+
+                # We can only mutate input elements.
+                if not value or not isinstance(value, Input):
+                    print(f'Component {key} does not exist or is not an input.')
+
+                    return
+
+                for k in range(len(state)):
+                    value.set(k, state[k])
+
+                value.emit(simulation)
+
+        if clock is not None:
+            clock.set(0, BIT_LOW)
+            clock.emit(simulation)
+
+        dead = simulation.simulate(steps)
+
+        if clock is not None:
+            clock.set(0, BIT_HIGH)
+            clock.emit(simulation)
+
+            # Overwrite dead value.
+            dead = simulation.simulate(steps)
+
+        # Concat iterators instead?
+        all_requests = requests + additional_requests
+
+        build = {}
+
+        for request in all_requests:
+            value = assemble.by_label.get(request)
+
+            if not value or not isinstance(value, InsightElement):
+                print(f'Component {request} does not exist or is not inspectable.')
+
+                return
+
+            if dead:
+                build[request] = 'ASTABLE'
+
+                continue
+
+            value = value.insight('content')
+
+            build[request] = value
+
+        results.append(build)
+
+    if args.readable:
+        columns = []
+
+        longest_left, longest_right = 0, 0
+
+        for i in range(len(results)):
+            in_value = waveform[i]
+            row = results[i]
+
+            left = ', '.join(f'{key} = {in_value[key]}' for key in in_value if in_value[key] != 'request')
+            right = ', '.join(f'{key} = {row[key]}' for key in row)
+
+            longest_left = max(longest_left, len(left))
+            longest_right = max(longest_right, len(right))
+
+            columns.append((left, right))
+
+        clocked_indicator = ' (Clocked)' if clock is not None else ''
+
+        left = f"Values Set{clocked_indicator}"
+        right = "Retrieved Values"
+
+        longest_left = max(longest_left, len(left))
+        longest_right = max(longest_right, len(right))
+
+        print(f'{left.ljust(longest_left)} | {right.rjust(longest_right)}')
+        print('-' * (longest_left + longest_right + 3))
+        print('\n'.join(f'{left.ljust(longest_left)} | {right.rjust(longest_right)}' for left, right in columns))
+    else:
+        print(json.dumps({
+            'steps': results
+        }))
+
+
+
+def main():
+    parser = ArgumentParser(
+        prog='digisim',
+        description='Digital Logic Simulation CLI'
+    )
+
+    subparsers = parser.add_subparsers(required=True, dest='command')
+
+    table = subparsers.add_parser('table', help='Generate Truth Table')
+    table.add_argument('file', type=FileType('r', encoding='UTF-8'))
+    table.add_argument('--circuit')
+    table.add_argument('--max-steps')
+    table.add_argument('--readable', action='store_true')
+
+    wave = subparsers.add_parser('wave', help='Generate Waveform')
+    wave.add_argument('file', type=FileType('r', encoding='UTF-8'))
+    wave.add_argument('--waveform', type=FileType('r', encoding='UTF-8'), required=True)
+    wave.add_argument('--circuit', required=False)
+    wave.add_argument('--max-steps')
+    wave.add_argument('--readable', action='store_true')
+
+    args = parser.parse_args()
+
+    if args.command == 'table':
+        build_truth_table(args)
+
+    if args.command == 'wave':
+        build_waveform(args)
+
+
+if __name__ == '__main__':
+    main()

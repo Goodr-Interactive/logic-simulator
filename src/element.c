@@ -11,9 +11,9 @@ void di_element_changed(DiElement *element, DiSimulation *simulation) {
     }
 }
 
-void di_element_reset(DiElement *element, DiSimulation *simulation) {
+void di_element_reset(DiElement *element) {
     if (element->reset) {
-        element->reset(element, simulation);
+        element->reset(element);
     }
 }
 

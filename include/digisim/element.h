@@ -23,7 +23,7 @@ typedef void (*DiChangedCallback)(DiElement *element, DiSimulation *simulation);
 /**
  * Callback function for resetting an elements internal state (ex. D-Latch latched values).
  */
-typedef void (*DiResetCallback)(DiElement *element, DiSimulation *simulation);
+typedef void (*DiResetCallback)(DiElement *element);
 
 /**
  * Element descriptor type that all elements/components/gates should inherit.
@@ -68,9 +68,8 @@ void di_element_changed(DiElement *element, DiSimulation *simulation);
  *
  * @memberof DiElement
  * @param element Element instance
- * @param simulation Simulation to propagate any output changes from internal state
  */
-void di_element_reset(DiElement *element, DiSimulation *simulation);
+void di_element_reset(DiElement *element);
 
 /**
  * Disconnects all connected terminals and nodes from this element.

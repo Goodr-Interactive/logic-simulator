@@ -26,6 +26,7 @@ add_library(digisim
     include/digisim/elements/sr-latch.h
     include/digisim/elements/multiplexer.h
     include/digisim/elements/demultiplexer.h
+    include/digisim/elements/register.h
     include/digisim/utility/node-list.h
     include/digisim/utility/terminal-list.h
 
@@ -50,6 +51,7 @@ add_library(digisim
     src/elements/sr-latch.c
     src/elements/multiplexer.c
     src/elements/demultiplexer.c
+    src/elements/register.c
     src/utility/node-list.c
     src/utility/terminal-list.c
 )

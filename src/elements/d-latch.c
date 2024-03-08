@@ -1,6 +1,7 @@
 #include <digisim/elements/d-latch.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 void di_d_latch_changed(DiElement *element, DiSimulation *simulation) {
     DiDLatch *self = (DiDLatch *)element;
@@ -8,7 +9,7 @@ void di_d_latch_changed(DiElement *element, DiSimulation *simulation) {
     DiSignal *clock = di_terminal_read(&self->clock);
     DiSignal *data = di_terminal_read(&self->data);
 
-    bool transparent = di_signal_get(clock, 1);
+    bool transparent = di_signal_get(clock, 0);
 
     if (transparent) {
         for (size_t a = 0; a < self->bits; a++) {
@@ -26,13 +27,14 @@ void di_d_latch_changed(DiElement *element, DiSimulation *simulation) {
 void di_d_latch_reset(DiElement *element) {
     DiDLatch *self = (DiDLatch *)element;
 
-
+    memset(self->state, 0, self->bits * sizeof(bool));
 }
 
 void di_d_latch_init(DiDLatch *latch, size_t bits) {
     di_element_init(&latch->element);
 
     latch->element.changed = di_d_latch_changed;
+    latch->element.reset = di_d_latch_reset;
 
     latch->bits = bits;
     latch->state = malloc(bits * sizeof(bool));
@@ -43,6 +45,8 @@ void di_d_latch_init(DiDLatch *latch, size_t bits) {
 }
 
 void di_d_latch_destroy(DiDLatch *latch) {
+    free(latch->state);
+
     di_element_destroy(&latch->element);
 
     di_terminal_destroy(&latch->data);
