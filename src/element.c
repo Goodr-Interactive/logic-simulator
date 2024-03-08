@@ -85,7 +85,7 @@ bool di_node_list_remove(DiNodeList *list, DiNode *value) {
     }
 
     for (; index < list->count; index++) {
-        values[index - 1] = values[index];
+        values[index] = values[index + 1];
     }
 
     list->count--;
