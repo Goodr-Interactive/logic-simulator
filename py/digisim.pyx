@@ -1,0 +1,256 @@
+from cpython.mem cimport PyMem_Malloc, PyMem_Free
+
+from typing import Optional
+
+BIT_LOW = 0
+BIT_HIGH = 1
+BIT_ERROR = 3
+BIT_UNKNOWN = 4
+
+cdef class Simulation:
+    cdef DiSimulation *simulation
+    cdef DiZeroSimulation *zero
+
+    def simulate(self, steps: int) -> bool:
+        return di_simulation_run(self.simulation, steps) == 1
+
+    def clear(self):
+        di_simulation_clear(self.simulation)
+
+    def count(self) -> int:
+        return self.zero.count
+
+    def add(self):
+        di_simulation_add(self.simulation, NULL)
+
+    def __init__(self):
+        self.simulation = di_simulation_create()
+        self.zero = <DiZeroSimulation *>self.simulation
+
+    def __del__(self):
+        di_simulation_free(self.simulation)
+
+cdef class Terminal:
+    cdef DiTerminal *terminal
+    cdef object parent
+
+    @staticmethod
+    cdef create(object parent, DiTerminal *terminal):
+        term = Terminal()
+
+        term.terminal = terminal
+        term.parent = parent
+
+        return term
+
+cdef class Node:
+    cdef DiNode *node
+
+    def connect(self, terminal: Terminal):
+        di_connect(self.node, terminal.terminal)
+
+    def disconnect(self, terminal: Terminal):
+        di_disconnect(self.node, terminal.terminal)
+
+    def get(self) -> list[int]:
+        return [di_signal_get(&self.node.signal, i) for i in range(self.node.signal.bits)]
+
+    def __init__(self, bits: int):
+        self.node = <DiNode *> PyMem_Malloc(sizeof(DiNode))
+
+        di_node_init(self.node, bits)
+
+    def __del__(self):
+        di_node_destroy(self.node)
+
+        PyMem_Free(self.node)
+
+
+cdef class Element:
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        raise NotImplementedError
+
+cdef class InsightElement(Element):
+    def insight(self, name: str) -> str:
+        raise NotImplementedError
+
+cdef class AndGate(Element):
+    cdef DiAnd *gate
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "input_a":
+            return Terminal.create(self, &self.gate.input_a)
+
+        if name == "input_b":
+            return Terminal.create(self, &self.gate.input_b)
+
+        if name == "output":
+            return Terminal.create(self, &self.gate.output)
+
+    def __init__(self, bits: int):
+        self.gate = <DiAnd *> PyMem_Malloc(sizeof(DiAnd))
+
+        di_and_init(self.gate, bits)
+
+    def __del__(self):
+        di_and_destroy(self.gate)
+
+        PyMem_Free(self.gate)
+
+
+cdef class OrGate(Element):
+    cdef DiOr *gate
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "input_a":
+            return Terminal.create(self, &self.gate.input_a)
+
+        if name == "input_b":
+            return Terminal.create(self, &self.gate.input_b)
+
+        if name == "output":
+            return Terminal.create(self, &self.gate.output)
+
+    def __init__(self, bits: int):
+        self.gate = <DiOr *> PyMem_Malloc(sizeof(DiOr))
+
+        di_or_init(self.gate, bits)
+
+    def __del__(self):
+        di_or_destroy(self.gate)
+
+        PyMem_Free(self.gate)
+
+
+cdef class NotGate(Element):
+    cdef DiNot *gate
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "input":
+            return Terminal.create(self, &self.gate.input)
+
+        if name == "output":
+            return Terminal.create(self, &self.gate.output)
+
+    def __init__(self, bits: int):
+        self.gate = <DiNot *> PyMem_Malloc(sizeof(DiNot))
+
+        di_not_init(self.gate, bits)
+
+    def __del__(self):
+        di_not_destroy(self.gate)
+
+        PyMem_Free(self.gate)
+
+def bit_to_bin_string(bit: int) -> str:
+    if bit == BIT_LOW:
+        return '0'
+
+    if bit == BIT_HIGH:
+        return '1'
+
+    if bit == BIT_ERROR:
+        return 'E'
+
+    if bit == BIT_UNKNOWN:
+        return 'U'
+
+    return 'X'
+
+cdef class Input(InsightElement):
+    cdef DiInput *gate
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "output":
+            return Terminal.create(self, &self.gate.output)
+
+    def insight(self, name: str) -> str:
+        value = [
+            bit_to_bin_string(di_signal_get(&self.gate.signal, i))
+
+            for i in range(self.gate.bits)
+        ]
+
+        return ''.join(value)
+
+    def set(self, index: int, bit: int):
+        di_signal_set(&self.gate.signal, index, bit)
+
+    def emit(self, simulation: Simulation):
+        di_input_emit(self.gate, simulation.simulation)
+
+    def bits(self) -> int:
+        return self.gate.bits
+
+    def __init__(self, bits: int):
+        self.gate = <DiInput *> PyMem_Malloc(sizeof(DiInput))
+
+        di_input_init(self.gate, bits)
+
+    def __del__(self):
+        di_input_destroy(self.gate)
+
+        PyMem_Free(self.gate)
+
+cdef class Output(InsightElement):
+    cdef DiOutput *gate
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "input":
+            return Terminal.create(self, &self.gate.input)
+
+    def insight(self, name: str) -> str:
+        value = [
+            bit_to_bin_string(di_signal_get(&self.gate.signal, i))
+
+            for i in range(self.gate.bits)
+        ]
+
+        return ''.join(value)
+
+    def get(self, index: int) -> int:
+        return di_output_get_bit(self.gate, index)
+
+    def bits(self) -> int:
+        return self.gate.bits
+
+    def __init__(self, bits: int):
+        self.gate = <DiOutput *> PyMem_Malloc(sizeof(DiOutput))
+
+        di_output_init(self.gate, bits)
+
+    def __del__(self):
+        di_output_destroy(self.gate)
+
+        PyMem_Free(self.gate)
+
+cdef class Register(InsightElement):
+    cdef DiRegister *reg
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "data":
+            return Terminal.create(self, &self.reg.data)
+
+        if name == "clock":
+            return Terminal.create(self, &self.reg.clock)
+
+        if name == "reset":
+            return Terminal.create(self, &self.reg.reset)
+
+        if name == "value":
+            return Terminal.create(self, &self.reg.value)
+
+    def insight(self, name: str) -> str:
+        value = ['1' if self.reg.state[i] else '0' for i in range(self.reg.bits)]
+
+        return ''.join(value)
+
+    def __init__(self, bits: int):
+        self.reg = <DiRegister *> PyMem_Malloc(sizeof(DiRegister))
+
+        di_register_init(self.reg, bits)
+
+    def __del__(self):
+        di_register_destroy(self.reg)
+
+        PyMem_Free(self.reg)

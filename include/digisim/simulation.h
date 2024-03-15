@@ -18,6 +18,11 @@ typedef struct di_simulation_t DiSimulation;
 typedef void (*DiSimulationAddCallback)(DiSimulation *simulation, DiNode *node);
 
 /**
+ * Callback to clear the simulation queue.
+ */
+typedef void (*DiSimulationClearCallback)(DiSimulation *simulation);
+
+/**
  * Callback to run this simulation.
  */
 typedef bool (*DiSimulationRunCallback)(DiSimulation *simulation, size_t max_depth);
@@ -39,6 +44,11 @@ typedef struct di_simulation_t {
     DiSimulationAddCallback add;
 
     /**
+     * Callback that's called by the user to clear the simulation queue.
+     */
+    DiSimulationClearCallback clear;
+
+    /**
      * Callback that's called by the user to start simulating.
      */
     DiSimulationRunCallback run;
@@ -49,17 +59,26 @@ typedef struct di_simulation_t {
  * Astable circuits may never finish simulating, so a max_step is required.
  *
  * @memberof DiSimulation
- * @param simulation The simulation queue
+ * @param simulation The simulation
  * @param max_depth The maximum number of wires changes to pursue before quiting
  * @return True if `max_step`s have passed and the simulation has not settled
  */
 bool di_simulation_run(DiSimulation *simulation, size_t max_depth);
 
 /**
+ * Clears the internal simulation queue.
+ * Use to discard any potential queued simulation changes (ex. if the circuit has been reset).
+ *
+ * @memberof DiSimulation
+ * @param simulation The simulation to clear
+ */
+void di_simulation_clear(DiSimulation *simulation);
+
+/**
  * Adds a node to the propagation queue (to be simulated later).
  *
  * @memberof DiSimulation
- * @param simulation The simulation queue (nullable)
+ * @param simulation The simulation object (nullable)
  * @param node The node to propagate
  */
 void di_simulation_add(DiSimulation *simulation, DiNode *node);

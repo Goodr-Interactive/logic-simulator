@@ -1,6 +1,7 @@
 #include <digisim/terminal.h>
 
 #include <digisim/node.h>
+#include <digisim/element.h>
 
 #include <assert.h>
 #include <string.h>
@@ -12,6 +13,8 @@ void di_terminal_init(DiTerminal *terminal, DiElement *parent, size_t bits) {
 
     terminal->holding = false;
     di_signal_init(&terminal->signal, bits);
+
+    di_terminal_list_add(&parent->connections, terminal);
 }
 
 void di_terminal_destroy(DiTerminal *terminal) {

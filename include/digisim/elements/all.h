@@ -20,5 +20,6 @@
 #include <digisim/elements/xor.h>
 #include <digisim/elements/xnor.h>
 #include <digisim/elements/output.h>
+#include <digisim/elements/register.h>
 
 #endif // DIGISIM_ELEMENTS_ALL_H

@@ -13,6 +13,7 @@ add_executable(digisim-tests
     test_gates.cpp
     test_simulation_stress.cpp
     test_ordering.cpp
+    test_register.cpp
 )
 
 set_target_properties(digisim-tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)

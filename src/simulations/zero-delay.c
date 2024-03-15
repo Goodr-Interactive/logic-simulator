@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include <digisim/node.h>
+#include <digisim/utility/node-list.h>
 
 #define DI_SIMULATION_DEFAULT_CAPACITY 2
 
@@ -55,6 +56,10 @@ bool di_zero_simulation_run(DiZeroSimulation *simulation, size_t max_step) {
     return step == max_step && simulation->count > 0;
 }
 
+void di_zero_simulation_clear(DiZeroSimulation *simulation) {
+    simulation->count = 0;
+}
+
 void di_zero_simulation_alloc(DiZeroSimulation *simulation, size_t capacity) {
     if (capacity < simulation->capacity) {
         return;
@@ -67,10 +72,6 @@ void di_zero_simulation_alloc(DiZeroSimulation *simulation, size_t capacity) {
 }
 
 void di_zero_simulation_add(DiZeroSimulation *simulation, DiNode *node) {
-    if (!simulation) {
-        return;
-    }
-
     if (simulation->count >= simulation->capacity) {
         size_t new_capacity = simulation->capacity * 2;
 
@@ -93,6 +94,12 @@ void di_zero_simulation_add_adapter(DiSimulation *simulation, DiNode *node) {
     di_zero_simulation_add(zero, node);
 }
 
+void di_zero_simulation_clear_adapter(DiSimulation *simulation) {
+    DiZeroSimulation *zero = (DiZeroSimulation *)simulation;
+
+    di_zero_simulation_clear(zero);
+}
+
 bool di_zero_simulation_run_adapter(DiSimulation *simulation, size_t max_steps) {
     DiZeroSimulation *zero = (DiZeroSimulation *)simulation;
 
@@ -101,6 +108,7 @@ bool di_zero_simulation_run_adapter(DiSimulation *simulation, size_t max_steps) 
 
 void di_zero_simulation_init(DiZeroSimulation *simulation) {
     simulation->simulation.add = di_zero_simulation_add_adapter;
+    simulation->simulation.clear = di_zero_simulation_clear_adapter;
     simulation->simulation.run = di_zero_simulation_run_adapter;
 
     simulation->count = 0;
