@@ -1,8 +1,12 @@
+from __future__ import annotations
+
+from logisim.pinouts import Pinout, PinIdentifier
 from logisim.project import LogisimCircuit, LogisimWire, LogisimComponent
 
 from typing import Optional
+from dataclasses import dataclass
 
-from digisim import Node, Element, AndGate, OrGate, NotGate, Input, Output, Register, InsightElement
+from digisim import Node, Element, AndGate, OrGate, XorGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal
 
 
 def create_and_element(attributes: dict[str, str]) -> Element:
@@ -15,6 +19,12 @@ def create_or_element(attributes: dict[str, str]) -> Element:
     width = int(attributes.get('width', '1'))
 
     return OrGate(width)
+
+
+def create_xor_element(attributes: dict[str, str]) -> Element:
+    width = int(attributes.get('width', '1'))
+
+    return XorGate(width)
 
 
 def create_not_element(attributes: dict[str, str]) -> Element:
@@ -39,12 +49,25 @@ def create_register_element(attributes: dict[str, str]) -> Element:
     return Register(width)
 
 
+# Input/Output Pins have a special role
+@dataclass
+class AssembledPin:
+    label: Optional[str]  # Name
+
+    position: tuple[int, int]  # Position of Input/Output
+    node: Optional[Node]  # Connected Wire
+
+    bits: int  # Pin Width
+
+    pass
+
+
 def create_element(component: LogisimComponent) -> Optional[Element]:
     element_map = {
         'AND Gate': create_and_element,
         'OR Gate': create_or_element,
+        'XOR Gate': create_xor_element,
         'NOT Gate': create_not_element,
-        'Pin': create_pin_element,
         'Register': create_register_element,
     }
 
@@ -58,61 +81,271 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
         return None
 
 
+class EmbeddedElement(Element):
+    inputs: list[Buffer]
+    outputs: list[Buffer]
+
+    pinout: Pinout
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == 'input':
+            return self.inputs[index].terminal('input', None)
+
+        if name == 'output':
+            return self.outputs[index].terminal('output', None)
+
+        raise ValueError
+
+    def __init__(self, position: tuple[int, int], inputs: list[Buffer], outputs: list[Buffer]):
+        self.inputs = inputs
+        self.outputs = outputs
+
+        self.pinout = {}
+
+        x, y = position
+
+        for i, output in enumerate(outputs):
+            current_y = y + i * 20
+
+            self.pinout[(x, current_y)] = PinIdentifier(
+                name='output',
+                index=i,
+                bits=output.bits()
+            )
+
+        current_x = x - 220
+
+        for i, value in enumerate(inputs):
+            current_y = y + i * 20
+
+            self.pinout[(current_x, current_y)] = PinIdentifier(
+                name='input',
+                index=i,
+                bits=value.bits()
+            )
+
+
+@dataclass
+class AssembledWire:
+    wire: LogisimWire
+    node: Optional[Node]
+
+
+@dataclass
+class AssembledElement:
+    pinout: Pinout
+    component: Optional[LogisimComponent]
+    element: Element
+
+    # In sub-circuits, I no longer want to include the pinout,
+    # since the pin locations aren't the same in the parent circuit!
+    def strip_pinout(self) -> AssembledElement:
+        return AssembledElement(
+            pinout={},
+            component=self.component,
+            element=self.element
+        )
+
+
+@dataclass
+class AssembledIO:
+    inputs: list[tuple[Optional[str], Input]]
+    outputs: list[tuple[Optional[str], Output]]
+
+    def input_named(self, name: str) -> Optional[Input]:
+        for input_name, value in self.inputs:
+            if input_name == name:
+                return value
+
+        return None
+
+    def output_named(self, name: str) -> Optional[Output]:
+        for output_name, value in self.outputs:
+            if output_name == name:
+                return value
+
+        return None
+
+
 class AssembledCircuit:
-    nodes: dict[LogisimWire, Optional[Node]]
-    elements: dict[LogisimComponent, Element]
+    nodes: list[AssembledWire]
+    elements: list[AssembledElement]
 
     unconnected: dict[tuple[int, int], str]
 
+    assembled_inputs: list[AssembledPin]
+    assembled_outputs: list[AssembledPin]
+
     by_label: dict[str, Element]
-
-    def inputs(self) -> list[tuple[Optional[str], Input]]:
-        result = []
-
-        for component, element in self.elements.items():
-            if isinstance(element, Input):
-                result.append((component.attributes.get('label'), element))
-
-        return result
-
-    def outputs(self) -> list[tuple[Optional[str], Output]]:
-        result = []
-
-        for component, element in self.elements.items():
-            if isinstance(element, Output):
-                result.append((component.attributes.get('label'), element))
-
-        return result
 
     def insights(self) -> list[tuple[Optional[str], InsightElement]]:
         result = []
 
-        for component, element in self.elements.items():
-            if isinstance(element, InsightElement):
-                result.append((component.attributes.get('label'), element))
+        for element in self.elements:
+            if isinstance(element.element, InsightElement) and element.component:
+                result.append((element.component.attributes.get('label'), element.element))
 
         return result
 
-    def __init__(self, circuit: LogisimCircuit):
-        self.nodes = {}
-        self.elements = {}
+    def burn_inputs(self) -> AssembledIO:
+        inputs = []
+        outputs = []
+
+        for pin in self.assembled_inputs:
+            value = Input(pin.bits)
+
+            if pin.node:
+                pin.node.connect(value.terminal("output", None))
+
+            inputs.append((pin.label, value))
+
+            self.by_label[pin.label] = value
+
+            self.elements.append(AssembledElement(
+                pinout={},
+                component=None,
+                element=value
+            ))
+
+        for pin in self.assembled_outputs:
+            output = Output(pin.bits)
+
+            if pin.node:
+                pin.node.connect(output.terminal("input", None))
+
+            outputs.append((pin.label, output))
+
+            self.by_label[pin.label] = output
+
+            self.elements.append(AssembledElement(
+                pinout={},
+                component=None,
+                element=output
+            ))
+
+        return AssembledIO(
+            inputs=inputs,
+            outputs=outputs
+        )
+
+    # Returns Inputs (into this circuit), Outputs (out of this circuit)
+    def burn_buffers(self) -> tuple[list[Buffer], list[Buffer]]:
+        inputs = []
+        outputs = []
+
+        for pin in self.assembled_inputs:
+            buffer = Buffer(pin.bits)
+
+            terminal = buffer.terminal("output", None)
+
+            if pin.node:
+                pin.node.connect(terminal)
+
+            inputs.append(buffer)
+
+            self.elements.append(AssembledElement(
+                pinout={},
+                component=None,
+                element=buffer
+            ))
+
+        for i, pin in enumerate(self.assembled_outputs):
+            buffer = Buffer(pin.bits)
+
+            terminal = buffer.terminal("input", None)
+
+            if pin.node:
+                pin.node.connect(terminal)
+
+            outputs.append(buffer)
+
+            self.elements.append(AssembledElement(
+                pinout={},
+                component=None,
+                element=buffer
+            ))
+
+        return inputs, outputs
+
+    @staticmethod
+    def assemble(circuit: LogisimCircuit, project: dict[str, LogisimCircuit]) -> tuple[AssembledCircuit, AssembledIO]:
+        assembled = AssembledCircuit(circuit, project, set())
+
+        io = assembled.burn_inputs()
+
+        return assembled, io
+
+    def __init__(self, circuit: LogisimCircuit, project: dict[str, LogisimCircuit], stack: set[str]):
+        self.nodes = []
+        self.elements = []
         self.unconnected = {}
+
+        self.assembled_inputs = []
+        self.assembled_outputs = []
 
         self.by_label = {}
 
         for component in circuit.components:
             label = component.attributes.get('label')
 
-            for value in component.pinout.keys():
-                self.unconnected[value] = component.component
+            if component.library is None:
+                # Build Custom Component
 
-            element = create_element(component)
+                name = component.component
+                sub_circuit = project[name]
 
-            if element:
-                self.elements[component] = element
+                if name in stack:
+                    raise ValueError(f'Circuit {name} is in an infinite recursive chain')
 
-                if label:
-                    self.by_label[label] = element
+                assembled = AssembledCircuit(sub_circuit, project, stack.union({name}))
+                inputs, outputs = assembled.burn_buffers()
+
+                assert len(assembled.unconnected) == 0  # Make sure any unconnected pins are propagated upwards.
+
+                self.nodes += assembled.nodes
+                self.elements += [element.strip_pinout() for element in assembled.elements]
+
+                element = EmbeddedElement(component.position, inputs, outputs)
+
+                self.elements.append(AssembledElement(
+                    pinout=element.pinout,
+                    component=None,
+                    element=element
+                ))
+            elif component.component == 'Pin':
+                # Add to Input/Output Interface
+
+                self.unconnected[component.position] = component.component
+
+                pin = AssembledPin(
+                    label=label,
+                    position=component.position,
+                    bits=int(component.attributes.get('width', '1')),
+                    node=None
+                )
+
+                if bool(component.attributes.get('output')):
+                    self.assembled_outputs.append(pin)
+                else:
+                    self.assembled_inputs.append(pin)
+            else:
+                # Regular Element
+                for value in component.pinout.keys():
+                    self.unconnected[value] = component.component
+
+                element = create_element(component)
+
+                if element:
+                    self.elements.append(AssembledElement(
+                        pinout=component.pinout,
+                        component=component,
+                        element=element
+                    ))
+
+                    if label:
+                        self.by_label[label] = element
+
+        all_pins = self.assembled_inputs + self.assembled_outputs
 
         for wire in circuit.wires:
             node: Optional[Node] = None
@@ -121,15 +354,30 @@ class AssembledCircuit:
                 if endpoint in self.unconnected:
                     del self.unconnected[endpoint]
 
-                for component in self.elements:
-                    pin = component.pinout.get(endpoint)
+                for pin in all_pins:
+                    if pin.position == endpoint:
+                        if node is None:
+                            node = Node(pin.bits)
+
+                        pin.node = node
+
+                for element in self.elements:
+                    pin = element.pinout.get(endpoint)
 
                     if pin:
-                        terminal = self.elements[component].terminal(pin.name, pin.index)
+                        terminal = element.element.terminal(pin.name, pin.index)
 
                         if node is None:
                             node = Node(pin.bits)
 
                         node.connect(terminal)
 
-            self.nodes[wire] = node
+            self.nodes.append(AssembledWire(wire=wire, node=node))
+
+    def __del__(self):
+        self.nodes = []
+        self.assembled_inputs = []
+        self.assembled_outputs = []
+
+        self.elements = []
+        self.by_label = {}

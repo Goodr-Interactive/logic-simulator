@@ -34,6 +34,9 @@ cdef class Terminal:
     cdef DiTerminal *terminal
     cdef object parent
 
+    def term_id(self) -> int:
+        return <size_t>self.terminal
+
     @staticmethod
     cdef create(object parent, DiTerminal *terminal):
         term = Terminal()
@@ -73,6 +76,7 @@ cdef class Element:
 cdef class InsightElement(Element):
     def insight(self, name: str) -> str:
         raise NotImplementedError
+
 
 cdef class AndGate(Element):
     cdef DiAnd *gate
@@ -118,6 +122,30 @@ cdef class OrGate(Element):
 
     def __del__(self):
         di_or_destroy(self.gate)
+
+        PyMem_Free(self.gate)
+
+
+cdef class XorGate(Element):
+    cdef DiXor *gate
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "input_a":
+            return Terminal.create(self, &self.gate.input_a)
+
+        if name == "input_b":
+            return Terminal.create(self, &self.gate.input_b)
+
+        if name == "output":
+            return Terminal.create(self, &self.gate.output)
+
+    def __init__(self, bits: int):
+        self.gate = <DiXor *> PyMem_Malloc(sizeof(DiXor))
+
+        di_xor_init(self.gate, bits)
+
+    def __del__(self):
+        di_xor_destroy(self.gate)
 
         PyMem_Free(self.gate)
 
@@ -254,3 +282,27 @@ cdef class Register(InsightElement):
         di_register_destroy(self.reg)
 
         PyMem_Free(self.reg)
+
+
+cdef class Buffer(Element):
+    cdef DiBuffer *buffer
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "input":
+            return Terminal.create(self, &self.buffer.input)
+
+        if name == "output":
+            return Terminal.create(self, &self.buffer.output)
+
+    def bits(self) -> int:
+        return self.buffer.bits
+
+    def __init__(self, bits: int):
+        self.buffer = <DiBuffer *> PyMem_Malloc(sizeof(DiBuffer))
+
+        di_buffer_init(self.buffer, bits)
+
+    def __del__(self):
+        di_buffer_destroy(self.buffer)
+
+        PyMem_Free(self.buffer)

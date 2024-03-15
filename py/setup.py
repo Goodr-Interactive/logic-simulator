@@ -6,7 +6,7 @@ ext_modules = [
         "digisim", ["digisim.pyx"],
         include_dirs=["../include"],
         libraries=["digisim"],
-        library_dirs=["../build"]
+        library_dirs=["./build"]
     )
 ]
 
