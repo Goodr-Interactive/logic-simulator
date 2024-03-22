@@ -18,5 +18,10 @@
 #include <digisim/elements/sr-latch.h>
 #include <digisim/elements/connector.h>
 #include <digisim/elements/splitter.h>
+#include <digisim/elements/arithmetic.h>
+#include <digisim/elements/comparator.h>
+#include <digisim/elements/constant.h>
+#include <digisim/elements/negate.h>
+#include <digisim/elements/shifter.h>
 
 #endif // DIGISIM_ELEMENTS_ALL_H
