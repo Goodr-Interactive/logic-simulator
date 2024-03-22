@@ -153,7 +153,7 @@ void di_signal_merge(DiSignal *destination, DiSignal *a_signal, DiSignal *b_sign
         uint64_t error = a_error[i] | b_error[i] |
                          (~(a_unknown[i] | b_unknown[i]) & (a_values[i] ^ b_values[i]));
         uint64_t unknown = a_unknown[i] & b_unknown[i] & ~error;
-        uint64_t value = a_values[i] | b_values[i] & ~error;
+        uint64_t value = (a_values[i] | b_values[i]) & ~error;
 
         destination_values[i] = value;
         destination_error[i] = error;
