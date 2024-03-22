@@ -14,10 +14,6 @@ void di_node_changed(DiNode *node, DiSimulation *simulation) {
 
     di_signal_fill(&node->signal, DI_BIT_UNKNOWN);
 
-    uint64_t *signal_values = di_signal_get_values(&node->signal);
-    uint64_t *signal_error = di_signal_get_error(&node->signal);
-    uint64_t *signal_unknown = di_signal_get_unknown(&node->signal);
-
     for (size_t a = 0; a < node->connections.count; a++) {
         DiTerminal *terminal = values[a];
 
@@ -25,20 +21,7 @@ void di_node_changed(DiNode *node, DiSimulation *simulation) {
             continue;
         }
 
-        uint64_t *terminal_values = di_signal_get_values(&terminal->signal);
-        uint64_t *terminal_error = di_signal_get_error(&terminal->signal);
-        uint64_t *terminal_unknown = di_signal_get_unknown(&terminal->signal);
-
-        for (size_t i = 0; i < DI_SIGNAL_U64_COUNT(node->bits); i++) {
-            uint64_t error = signal_error[i] | terminal_error[i] |
-                             (~(signal_unknown[i] | terminal_unknown[i]) & (signal_values[i] ^ terminal_values[i]));
-            uint64_t unknown = signal_unknown[i] & terminal_unknown[i] & ~error;
-            uint64_t value = signal_values[i] | terminal_values[i] & ~error;
-
-            signal_values[i] = value;
-            signal_error[i] = error;
-            signal_unknown[i] = unknown;
-        }
+        di_signal_merge(&node->signal, &node->signal, &terminal->signal);
     }
 
     if (!di_signal_equal(&node->signal, &node->last_signal)) {

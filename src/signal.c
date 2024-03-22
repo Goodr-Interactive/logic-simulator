@@ -141,6 +141,34 @@ void di_signal_copy(DiSignal *signal, DiSignal *source) {
     memcpy(di_signal_get_values(signal), di_signal_get_values(source), byte_count);
 }
 
+void di_signal_merge(DiSignal *destination, DiSignal *a_signal, DiSignal *b_signal) {
+    assert(destination->bits == a_signal->bits);
+    assert(a_signal->bits == b_signal->bits);
+
+    uint64_t *destination_values = di_signal_get_values(destination);
+    uint64_t *destination_error = di_signal_get_error(destination);
+    uint64_t *destination_unknown = di_signal_get_unknown(destination);
+
+    uint64_t *a_values = di_signal_get_values(a_signal);
+    uint64_t *a_error = di_signal_get_error(a_signal);
+    uint64_t *a_unknown = di_signal_get_unknown(a_signal);
+
+    uint64_t *b_values = di_signal_get_values(b_signal);
+    uint64_t *b_error = di_signal_get_error(b_signal);
+    uint64_t *b_unknown = di_signal_get_unknown(b_signal);
+
+    for (size_t i = 0; i < DI_SIGNAL_U64_COUNT(a_signal->bits); i++) {
+        uint64_t error = a_error[i] | b_error[i] |
+                         (~(a_unknown[i] | b_unknown[i]) & (a_values[i] ^ b_values[i]));
+        uint64_t unknown = a_unknown[i] & b_unknown[i] & ~error;
+        uint64_t value = a_values[i] | b_values[i] & ~error;
+
+        destination_values[i] = value;
+        destination_error[i] = error;
+        destination_unknown[i] = unknown;
+    }
+}
+
 void di_signal_init(DiSignal *signal, size_t bits) {
     signal->bits = bits;
 
