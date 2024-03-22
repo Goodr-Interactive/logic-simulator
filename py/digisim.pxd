@@ -16,7 +16,6 @@ cdef extern from "digisim/signal.h":
 
         DiSignalContent content
 
-    DiBit di_bit_logical(bint value)
     bint di_bit_value(DiBit bit, bint default_value)
     DiBit di_signal_get(DiSignal *signal, size_t index)
     void di_signal_set(DiSignal *signal, size_t index, DiBit bit)

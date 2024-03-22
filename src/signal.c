@@ -7,14 +7,6 @@
 // Bitmask to ignore bits that aren't part of this signal
 #define DI_SIGNAL_TOP_BIT_MASK(bits) (~((~(uint64_t)0) << bits))
 
-DiBit di_bit_logical(bool value) {
-    if (value) {
-        return DI_BIT_HIGH;
-    } else {
-        return DI_BIT_LOW;
-    }
-}
-
 bool di_bit_value(DiBit bit, bool default_value) {
     switch (bit) {
     case DI_BIT_LOW:
