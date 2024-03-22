@@ -8,6 +8,7 @@
 
 #include <digisim/element.h>
 #include <digisim/terminal.h>
+#include <digisim/utility/gate_inputs.h>
 
 /**
  * And gate element.
@@ -26,14 +27,9 @@ typedef struct di_and_t {
     size_t bits;
 
     /**
-     * First gate input
+     * List of input terminals.
      */
-    DiTerminal input_a;
-
-    /**
-     * Second gate input
-     */
-    DiTerminal input_b;
+    DiGateInputs inputs;
 
     /**
      * Gate output (emits input_a && input_b)
@@ -47,8 +43,9 @@ typedef struct di_and_t {
  * @memberof DiAnd
  * @param self Pointer to initialize
  * @param bits Bit-size for the input/output terminals
+ * @param input_count The number of inputs for the gate. Must be greater than 2.
  */
-void di_and_init(DiAnd *self, size_t bits);
+void di_and_init(DiAnd *self, size_t bits, size_t input_count);
 
 /**
  * Destroy a DiAnd struct.

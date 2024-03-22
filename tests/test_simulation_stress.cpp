@@ -9,10 +9,13 @@ template <bool pop, bool enforce = true> void test_simulation(size_t times) {
 
     DiAnd gate;
 
-    di_and_init(&gate, 1);
+    di_and_init(&gate, 1, 2);
+
+    auto input_a = di_gate_inputs_get(&gate.inputs, 0);
+    auto input_b = di_gate_inputs_get(&gate.inputs, 1);
 
     {
-        BinaryGate binary(&gate.input_a, &gate.input_b, &gate.output);
+        BinaryGate binary(input_a, input_b, &gate.output);
 
         std::array inputs = {
             std::make_tuple(DI_BIT_LOW, DI_BIT_LOW, DI_BIT_LOW),

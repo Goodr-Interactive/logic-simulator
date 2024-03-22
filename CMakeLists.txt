@@ -29,6 +29,7 @@ add_library(digisim
     include/digisim/elements/register.h
     include/digisim/utility/node-list.h
     include/digisim/utility/terminal-list.h
+    include/digisim/utility/gate_inputs.h
 
     src/node.c
     src/signal.c
@@ -54,6 +55,7 @@ add_library(digisim
     src/elements/register.c
     src/utility/node-list.c
     src/utility/terminal-list.c
+    src/utility/gate_inputs.c
 )
 
 set_target_properties(digisim PROPERTIES C_STANDARD 11)
