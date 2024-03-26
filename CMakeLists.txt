@@ -13,12 +13,7 @@ add_library(digisim
     include/digisim/simulations/zero-delay.h
     include/digisim/elements/all.h
     include/digisim/elements/not.h
-    include/digisim/elements/and.h
-    include/digisim/elements/or.h
-    include/digisim/elements/nand.h
-    include/digisim/elements/xor.h
-    include/digisim/elements/xnor.h
-    include/digisim/elements/nor.h
+    include/digisim/elements/gate.h
     include/digisim/elements/input.h
     include/digisim/elements/output.h
     include/digisim/elements/buffer.h
@@ -38,12 +33,7 @@ add_library(digisim
     src/simulation.c
     src/simulations/unit-delay.c
     src/simulations/zero-delay.c
-    src/elements/and.c
-    src/elements/or.c
-    src/elements/nand.c
-    src/elements/nor.c
-    src/elements/xor.c
-    src/elements/xnor.c
+    src/elements/gate.c
     src/elements/input.c
     src/elements/not.c
     src/elements/output.c

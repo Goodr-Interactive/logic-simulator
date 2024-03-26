@@ -11,8 +11,8 @@ SrLatch::SrLatch() {
 
     di_output_init(&value, 1);
 
-    di_or_init(&first, 1, 2);
-    di_or_init(&second, 1, 2);
+    di_gate_init(&first, DI_GATE_OP_OR, 1, 2);
+    di_gate_init(&second, DI_GATE_OP_OR, 1, 2);
 
     di_not_init(&firstNegate, 1);
     di_not_init(&secondNegate, 1);
@@ -51,8 +51,8 @@ SrLatch::~SrLatch() {
     di_node_destroy(&firstNegateToSecond);
     di_node_destroy(&secondNegateToFirst);
 
-    di_or_destroy(&first);
-    di_or_destroy(&second);
+    di_gate_destroy(&first);
+    di_gate_destroy(&second);
 
     di_not_destroy(&firstNegate);
     di_not_destroy(&secondNegate);

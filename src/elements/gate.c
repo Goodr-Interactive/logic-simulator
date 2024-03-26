@@ -1,11 +1,11 @@
-#include <digisim/elements/or.h>
+#include <digisim/elements/gate.h>
 
 #include <digisim/node.h>
 
 #include <assert.h>
 
-void di_or_changed(DiElement *component, DiSimulation *simulation) {
-    DiOr *self = (DiOr *)component;
+void di_gate_changed(DiElement *component, DiSimulation *simulation) {
+    DiGate *self = (DiGate *)component;
 
     DiSignal *output = &self->output.signal;
 
@@ -25,7 +25,28 @@ void di_or_changed(DiElement *component, DiSimulation *simulation) {
         for (size_t a = 0; a < self->bits; a++) {
             size_t error = output_error[a] | in_error[a];
             size_t unknown = output_unknown[a] & in_unknown[a];
-            size_t value = (output_values[a] | in_values[a]) & ~error;
+            size_t value;
+
+            switch (self->op) {
+            case DI_GATE_OP_AND:
+                value = (output_values[a] & in_values[a]) & ~error;
+                break;
+            case DI_GATE_OP_OR:
+                value = (output_values[a] | in_values[a]) & ~error;
+                break;
+            case DI_GATE_OP_XOR:
+                value = (output_values[a] ^ in_values[a]) & ~error;
+                break;
+            case DI_GATE_OP_NAND:
+                value = ~(output_values[a] & in_values[a]) & ~error;
+                break;
+            case DI_GATE_OP_NOR:
+                value = ~(output_values[a] | in_values[a]) & ~error;
+                break;
+            case DI_GATE_OP_XNOR:
+                value = ~(output_values[a] ^ in_values[a]) & ~error;
+                break;
+            }
 
             output_error[a] = error;
             output_unknown[a] = unknown;
@@ -36,11 +57,12 @@ void di_or_changed(DiElement *component, DiSimulation *simulation) {
     di_terminal_send(&self->output, simulation);
 }
 
-void di_or_init(DiOr *self, size_t bits, size_t input_count) {
+void di_gate_init(DiGate *self, DiGateOp op, size_t bits, size_t input_count) {
     di_element_init(&self->element);
 
-    self->element.changed = di_or_changed;
+    self->element.changed = di_gate_changed;
 
+    self->op = op;
     self->bits = bits;
 
     assert(input_count >= 2);
@@ -54,7 +76,7 @@ void di_or_init(DiOr *self, size_t bits, size_t input_count) {
     di_terminal_init(&self->output, &self->element, bits);
 }
 
-void di_or_destroy(DiOr *self) {
+void di_gate_destroy(DiGate *self) {
     for (size_t a = 0; a < self->inputs.count; a++) {
         di_terminal_destroy(di_gate_inputs_get(&self->inputs, a));
     }

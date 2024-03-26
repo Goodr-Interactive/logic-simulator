@@ -7,9 +7,9 @@
 template <bool pop, bool enforce = true> void test_simulation(size_t times) {
     DiSimulation *simulation = di_simulation_create();
 
-    DiAnd gate;
+    DiGate gate;
 
-    di_and_init(&gate, 1, 2);
+    di_gate_init(&gate, DI_GATE_OP_AND, 1, 2);
 
     auto input_a = di_gate_inputs_get(&gate.inputs, 0);
     auto input_b = di_gate_inputs_get(&gate.inputs, 1);
@@ -46,7 +46,7 @@ template <bool pop, bool enforce = true> void test_simulation(size_t times) {
         }
     }
 
-    di_and_destroy(&gate);
+    di_gate_destroy(&gate);
 
     di_simulation_free(simulation);
 }

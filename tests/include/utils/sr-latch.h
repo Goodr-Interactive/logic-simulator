@@ -14,8 +14,8 @@ struct SrLatch {
 
     DiOutput value{};
 
-    DiOr first{};
-    DiOr second{};
+    DiGate first{};
+    DiGate second{};
 
     DiNot firstNegate{};
     DiNot secondNegate{};
