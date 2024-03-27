@@ -50,6 +50,7 @@ def create_binary_gate_pinout(position: tuple[int, int], attributes: dict[str, s
     size = int(attributes.get('size', '50'))
     facing = attributes.get('facing', 'east')
     width = int(attributes.get('width', '1'))
+    inputs = int(attributes.get('inputs', '2'))
 
     size_half = size // 20 * 10
     size += height_offset  # XOR gates are a bit longer
@@ -57,16 +58,51 @@ def create_binary_gate_pinout(position: tuple[int, int], attributes: dict[str, s
     dir_x, dir_y = facing_to_direction(facing)
     norm_x, norm_y = facing_to_normal_direction(facing)
 
-    pin1_x = x + dir_x * size + norm_x * size_half
-    pin1_y = y + dir_y * size + norm_y * size_half
-    pin2_x = x + dir_x * size - norm_x * size_half
-    pin2_y = y + dir_y * size - norm_y * size_half
-
-    return {
+    result = {
         (x, y): PinIdentifier(name='output', bits=width),
-        (pin1_x, pin1_y): PinIdentifier(name='input_a', bits=width),
-        (pin2_x, pin2_y): PinIdentifier(name='input_b', bits=width)
     }
+
+    # Ordering of inputs for logic gates to terminal doesn't matter, so I pick an incremental order
+    input_index = 0
+
+    if inputs % 2 == 1:
+        # odd, add middle pin
+        pin_x = x + dir_x * size
+        pin_y = y + dir_y * size
+
+        result[(pin_x, pin_y)] = PinIdentifier(name='inputs', index=input_index, bits=width)
+        input_index += 1
+
+    if inputs <= 3:
+        # add side pins
+        pin1_x = x + dir_x * size + norm_x * size_half
+        pin1_y = y + dir_y * size + norm_y * size_half
+        pin2_x = x + dir_x * size - norm_x * size_half
+        pin2_y = y + dir_y * size - norm_y * size_half
+
+        result[(pin1_x, pin1_y)] = PinIdentifier(name='inputs', index=input_index, bits=width)
+        input_index += 1
+
+        result[(pin2_x, pin2_y)] = PinIdentifier(name='inputs', index=input_index, bits=width)
+        input_index += 1
+    else:
+        input_half = inputs // 2
+
+        for i in range(input_half):
+            pin_x = x + dir_x * size + norm_x * 10 * (i + 1)
+            pin_y = y + dir_y * size + norm_y * 10 * (i + 1)
+
+            result[(pin_x, pin_y)] = PinIdentifier(name='inputs', index=input_index, bits=width)
+            input_index += 1
+
+        for i in range(input_half):
+            pin_x = x + dir_x * size - norm_x * 10 * (i + 1)
+            pin_y = y + dir_y * size - norm_y * 10 * (i + 1)
+
+            result[(pin_x, pin_y)] = PinIdentifier(name='inputs', index=input_index, bits=width)
+            input_index += 1
+
+    return result
 
 
 def create_unary_gate_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
@@ -115,6 +151,9 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
         'AND Gate': create_binary_gate_pinout,
         'OR Gate': create_binary_gate_pinout,
         'XOR Gate': lambda p, a: create_binary_gate_pinout(p, a, 10),
+        'NAND Gate': lambda p, a: create_binary_gate_pinout(p, a, 10),
+        'NOR Gate': lambda p, a: create_binary_gate_pinout(p, a, 10),
+        'XNOR Gate': lambda p, a: create_binary_gate_pinout(p, a, 20),
         'NOT Gate': create_unary_gate_pinout,
         'Pin': create_pin_pinout,
         'Register': create_register_pinout,

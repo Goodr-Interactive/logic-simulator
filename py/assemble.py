@@ -6,25 +6,15 @@ from logisim.project import LogisimCircuit, LogisimWire, LogisimComponent
 from typing import Optional
 from dataclasses import dataclass
 
-from digisim import Node, Element, AndGate, OrGate, XorGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal
+from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal
+from digisim import GATE_AND, GATE_OR, GATE_XOR, GATE_NAND, GATE_NOR, GATE_XNOR
 
 
-def create_and_element(attributes: dict[str, str]) -> Element:
+def create_logic_gate_element(attributes: dict[str, str], op: int) -> Element:
     width = int(attributes.get('width', '1'))
+    inputs = int(attributes.get('inputs', '2'))
 
-    return AndGate(width)
-
-
-def create_or_element(attributes: dict[str, str]) -> Element:
-    width = int(attributes.get('width', '1'))
-
-    return OrGate(width)
-
-
-def create_xor_element(attributes: dict[str, str]) -> Element:
-    width = int(attributes.get('width', '1'))
-
-    return XorGate(width)
+    return LogicGate(op, width, inputs)
 
 
 def create_not_element(attributes: dict[str, str]) -> Element:
@@ -64,9 +54,12 @@ class AssembledPin:
 
 def create_element(component: LogisimComponent) -> Optional[Element]:
     element_map = {
-        'AND Gate': create_and_element,
-        'OR Gate': create_or_element,
-        'XOR Gate': create_xor_element,
+        'AND Gate': lambda attr: create_logic_gate_element(attr, GATE_AND),
+        'OR Gate': lambda attr: create_logic_gate_element(attr, GATE_OR),
+        'XOR Gate': lambda attr: create_logic_gate_element(attr, GATE_XOR),
+        'NAND Gate': lambda attr: create_logic_gate_element(attr, GATE_NAND),
+        'NOR Gate': lambda attr: create_logic_gate_element(attr, GATE_NOR),
+        'XNOR Gate': lambda attr: create_logic_gate_element(attr, GATE_XNOR),
         'NOT Gate': create_not_element,
         'Register': create_register_element,
     }

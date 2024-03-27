@@ -7,6 +7,13 @@ BIT_HIGH = 1
 BIT_ERROR = 3
 BIT_UNKNOWN = 4
 
+GATE_AND = 0
+GATE_OR = 1
+GATE_XOR = 2
+GATE_NAND = 3
+GATE_NOR = 4
+GATE_XNOR = 5
+
 cdef class Simulation:
     cdef DiSimulation *simulation
     cdef DiZeroSimulation *zero
@@ -78,74 +85,24 @@ cdef class InsightElement(Element):
         raise NotImplementedError
 
 
-cdef class AndGate(Element):
-    cdef DiAnd *gate
+cdef class LogicGate(Element):
+    cdef DiGate *gate
 
     def terminal(self, name: str, index: Optional[int]) -> Terminal:
-        if name == "input_a":
-            return Terminal.create(self, &self.gate.input_a)
-
-        if name == "input_b":
-            return Terminal.create(self, &self.gate.input_b)
+        if name == "inputs":
+            return Terminal.create(self, di_gate_inputs_get(&self.gate.inputs, index))
 
         if name == "output":
             return Terminal.create(self, &self.gate.output)
 
-    def __init__(self, bits: int):
-        self.gate = <DiAnd *> PyMem_Malloc(sizeof(DiAnd))
+    # op is GATE_AND/GATE_OR/GATE_XOR/etc.
+    def __init__(self, op: int, bits: int, input_count: int):
+        self.gate = <DiGate *> PyMem_Malloc(sizeof(DiGate))
 
-        di_and_init(self.gate, bits)
-
-    def __del__(self):
-        di_and_destroy(self.gate)
-
-        PyMem_Free(self.gate)
-
-
-cdef class OrGate(Element):
-    cdef DiOr *gate
-
-    def terminal(self, name: str, index: Optional[int]) -> Terminal:
-        if name == "input_a":
-            return Terminal.create(self, &self.gate.input_a)
-
-        if name == "input_b":
-            return Terminal.create(self, &self.gate.input_b)
-
-        if name == "output":
-            return Terminal.create(self, &self.gate.output)
-
-    def __init__(self, bits: int):
-        self.gate = <DiOr *> PyMem_Malloc(sizeof(DiOr))
-
-        di_or_init(self.gate, bits)
+        di_gate_init(self.gate, op, bits, input_count)
 
     def __del__(self):
-        di_or_destroy(self.gate)
-
-        PyMem_Free(self.gate)
-
-
-cdef class XorGate(Element):
-    cdef DiXor *gate
-
-    def terminal(self, name: str, index: Optional[int]) -> Terminal:
-        if name == "input_a":
-            return Terminal.create(self, &self.gate.input_a)
-
-        if name == "input_b":
-            return Terminal.create(self, &self.gate.input_b)
-
-        if name == "output":
-            return Terminal.create(self, &self.gate.output)
-
-    def __init__(self, bits: int):
-        self.gate = <DiXor *> PyMem_Malloc(sizeof(DiXor))
-
-        di_xor_init(self.gate, bits)
-
-    def __del__(self):
-        di_xor_destroy(self.gate)
+        di_gate_destroy(self.gate)
 
         PyMem_Free(self.gate)
 

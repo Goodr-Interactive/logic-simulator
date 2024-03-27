@@ -1,8 +1,11 @@
 #include <digisim/utility/gate_inputs.h>
 
+#include <assert.h>
 #include <stdlib.h>
 
 DiTerminal *di_gate_inputs_get(DiGateInputs *inputs, size_t index) {
+    assert(index < inputs->count);
+
     if (inputs->count > DI_GATE_INPUTS_LOCAL_COUNT) {
         return &inputs->heap[index];
     } else {
