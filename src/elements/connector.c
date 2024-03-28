@@ -3,6 +3,10 @@
 void di_connector_changed(DiElement *element, DiSimulation *simulation) {
     DiConnector *connector = (DiConnector *)element;
 
+    // Release influence on these wires so we can get a clear read.
+    di_terminal_reset(&connector->connection_a, simulation);
+    di_terminal_reset(&connector->connection_b, simulation);
+
     DiSignal *signal_a = di_terminal_read(&connector->connection_a);
     DiSignal *signal_b = di_terminal_read(&connector->connection_b);
 

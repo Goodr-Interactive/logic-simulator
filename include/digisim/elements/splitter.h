@@ -51,6 +51,20 @@ typedef struct di_splitter_t {
      * For internal use. Should be equal to the signal of end after a changed call.
      */
     DiSignal split_accumulator;
+
+    /**
+     * Temporary signal for getting the value of the end terminal.
+     *
+     * For internal use.
+     */
+    DiSignal end_signal;
+
+    /**
+     * Temporary signals for reading from the splits terminals.
+     *
+     * For internal use. This array contains `split_count` elements.
+     */
+    DiSignal *split_signals;
 } DiSplitter;
 
 /**

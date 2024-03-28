@@ -78,6 +78,19 @@ void di_node_destroy(DiNode *node);
 void di_node_changed(DiNode *node, DiSimulation *simulation);
 
 /**
+ * Recalculates the value of the wire and stores it in output.
+ *
+ * Optionally, passing a terminal in excluding will ignore this terminal in the wire value calculations.
+ * This is useful for getting the value of the wire without the influence from your own component.
+ *
+ * @memberof DiNode
+ * @param node Node instance
+ * @param output Where the value of the wire is written.
+ * @param excluding Optionally, a terminal that should be excluded from the calculations.
+ */
+void di_node_value(DiNode *node, DiSignal *output, DiTerminal *excluding);
+
+/**
  * Propagates a change in the wire value to all connected DiTerminals.
  *
  * Calls di_element_changed on the connected terminals.
