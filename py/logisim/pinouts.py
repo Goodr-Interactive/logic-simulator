@@ -146,6 +146,56 @@ def create_register_pinout(position: tuple[int, int], attributes: dict[str, str]
     }
 
 
+def splitter_bit_per_pin(fanout: int, attributes: dict[str, str]) -> list[int]:
+    result = [0] * fanout
+
+    other = 0
+
+    for i in range(fanout):
+        bit_name = f'bit{i}'
+
+        value = attributes.get(bit_name, i)
+
+        if value is not None:
+            value = int(value)
+
+            if value < fanout:
+                result[value] += 1
+
+    return result
+
+
+def create_splitter_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+    is_right = attributes.get('appear') == 'right'
+    norm_multiplier = -1 if is_right else +1
+
+    width = int(attributes.get('incoming', '2'))
+    fanout = int(attributes.get('fanout', '2'))
+    facing = attributes.get('facing', 'east')
+    spacing = int(attributes.get('spacing', '1'))
+
+    x, y = position
+
+    result = {
+        position: PinIdentifier(name='end', bits=width)
+    }
+
+    dir_x, dir_y = facing_to_direction(facing)
+    dir_x, dir_y = -dir_x * 20, -dir_y * 20
+    norm_x, norm_y = facing_to_normal_direction(facing)
+    norm_x, norm_y = norm_x * norm_multiplier * spacing * 10, norm_y * norm_multiplier * spacing * 10
+
+    bits = splitter_bit_per_pin(fanout, attributes)
+
+    for i in range(fanout):
+        pin_x = dir_x + norm_x * (i + 1) + x
+        pin_y = dir_y + norm_y * (i + 1) + y
+
+        result[(pin_x, pin_y)] = PinIdentifier(name='split', index=i, bits=bits[i])
+
+    return result
+
+
 def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
     pinout_map = {
         'AND Gate': create_binary_gate_pinout,
@@ -157,6 +207,7 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
         'NOT Gate': create_unary_gate_pinout,
         'Pin': create_pin_pinout,
         'Register': create_register_pinout,
+        'Splitter': create_splitter_pinout,
     }
 
     pinout_factory = pinout_map.get(gate)

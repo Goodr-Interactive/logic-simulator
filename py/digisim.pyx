@@ -265,3 +265,55 @@ cdef class Buffer(Element):
         di_buffer_destroy(self.buffer)
 
         PyMem_Free(self.buffer)
+
+
+cdef class Connector(Element):
+    cdef DiConnector *connector
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "input":
+            return Terminal.create(self, &self.connector.connection_a)
+
+        if name == "output":
+            return Terminal.create(self, &self.connector.connection_b)
+
+    def bits(self) -> int:
+        return self.connector.bits
+
+    def __init__(self, bits: int):
+        self.connector = <DiConnector *> PyMem_Malloc(sizeof(DiConnector))
+
+        di_connector_init(self.connector, bits)
+
+    def __del__(self):
+        di_connector_destroy(self.connector)
+
+        PyMem_Free(self.connector)
+
+
+cdef class Splitter(Element):
+    cdef DiSplitter *splitter
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "end":
+            return Terminal.create(self, &self.splitter.end)
+
+        if name == "split":
+            assert index < self.splitter.split_count
+
+            return Terminal.create(self, &self.splitter.splits[index])
+
+    def __init__(self, bits: int, split_count: int, splits: list[int]):
+        self.splitter = <DiSplitter *> PyMem_Malloc(sizeof(DiSplitter))
+
+        cdef size_t *split_array = <size_t *> PyMem_Malloc(sizeof(size_t) * split_count)
+
+        for i in range(split_count):
+            split_array[i] = splits[i]
+
+        di_splitter_init(self.splitter, bits, split_count, split_array)
+
+    def __del__(self):
+        di_splitter_destroy(self.splitter)
+
+        PyMem_Free(self.splitter)

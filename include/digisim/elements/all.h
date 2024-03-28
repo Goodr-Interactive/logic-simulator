@@ -16,5 +16,7 @@
 #include <digisim/elements/output.h>
 #include <digisim/elements/register.h>
 #include <digisim/elements/sr-latch.h>
+#include <digisim/elements/connector.h>
+#include <digisim/elements/splitter.h>
 
 #endif // DIGISIM_ELEMENTS_ALL_H

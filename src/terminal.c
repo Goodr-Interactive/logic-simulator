@@ -73,3 +73,14 @@ DiSignal *di_terminal_read(DiTerminal *terminal) {
 
     return &terminal->signal;
 }
+
+
+void di_terminal_directional_read(DiTerminal *terminal, DiSignal *output) {
+    assert(output->bits == terminal->bits);
+
+    if (terminal->node) {
+        di_node_value(terminal->node, output, terminal);
+    } else {
+        di_signal_fill(output, DI_BIT_UNKNOWN);
+    }
+}

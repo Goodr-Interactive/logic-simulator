@@ -183,6 +183,20 @@ DiSignal di_signal_filled(size_t bits, DiBit bit);
 bool di_signal_equal(DiSignal *signal, DiSignal *other);
 
 /**
+ * Merge a list of signals as if they were connected by a wire.
+ * E.g. If one signal has DI_BIT_UNCONNECTED, then this bit resolves to the value of the other signal.
+ *      If both signals are DI_BIT_UNCONNECTED, then this bit resolves to DI_BIT_UNCONNECTED.
+ *      If either signal is DI_BIT_ERROR, or if the value of both signals are conflicts (one LOW, one HIGH),
+ *      then this bit resolves to DI_BIT_ERROR.
+ *
+ * @param destination_signal The result of into_signal merged with merge_signal is dropped here.
+ *                           This *can* be equal to a_signal, for an accumulative merge.
+ * @param a_signal The first signal to merge with b_signal.
+ * @param b_signal The second signal to merge with a_signal.
+ */
+void di_signal_merge(DiSignal *destination, DiSignal *a_signal, DiSignal *b_signal);
+
+/**
  * Overwrites the value of `signal` with the value at `source`.
  * The amount of bits in both signals must be the same (`signal->bits == source->bits`).
  *

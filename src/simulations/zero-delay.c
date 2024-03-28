@@ -25,9 +25,7 @@ bool di_zero_simulation_run(DiZeroSimulation *simulation, size_t max_step) {
 
     di_node_list_init(&terminated);
 
-    size_t step = 0;
-
-    while (simulation->count > 0 && step < max_step) {
+    while (simulation->count > 0) {
         DiZeroSimulationEntry entry = *di_zero_simulation_pop(simulation);
 
         if (entry.depth > max_step) {
@@ -51,9 +49,10 @@ bool di_zero_simulation_run(DiZeroSimulation *simulation, size_t max_step) {
         di_zero_simulation_add(simulation, node);
     }
 
+    di_node_list_clear(&terminated);
     di_node_list_destroy(&terminated);
 
-    return step == max_step && simulation->count > 0;
+    return simulation->count > 0;
 }
 
 void di_zero_simulation_clear(DiZeroSimulation *simulation) {

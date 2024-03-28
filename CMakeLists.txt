@@ -22,6 +22,8 @@ add_library(digisim
     include/digisim/elements/multiplexer.h
     include/digisim/elements/demultiplexer.h
     include/digisim/elements/register.h
+    include/digisim/elements/connector.h
+    include/digisim/elements/splitter.h
     include/digisim/utility/node-list.h
     include/digisim/utility/terminal-list.h
     include/digisim/utility/gate_inputs.h
@@ -43,6 +45,8 @@ add_library(digisim
     src/elements/multiplexer.c
     src/elements/demultiplexer.c
     src/elements/register.c
+    src/elements/connector.c
+    src/elements/splitter.c
     src/utility/node-list.c
     src/utility/terminal-list.c
     src/utility/gate_inputs.c

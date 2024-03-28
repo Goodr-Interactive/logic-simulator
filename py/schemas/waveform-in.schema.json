@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "title": "Waveform",
+  "description": "This file describes a series of inputs that will be simulated in succession.",
+  "type": "object",
+  "properties": {
+    "waveform": {
+      "type": "array",
+      "title": "Simulation Step",
+      "items": {
+        "type": "object",
+        "title": "Simulation Unit",
+        "description": "Describes a mapping of pins/component names to values. Each operation will be completed, and then the circuit will be simulated and results will be recorded.",
+        "additionalProperties": {
+          "type": "string",
+          "title": "Operation",
+          "description": "The keys for this object are pin or component names. If this value is a bit string, then it will set the corresponding input pin to this value. If the value is \"request\", then the value of this component (e.g. register/output pin) will be reported after the simulation.",
+          "pattern": "^([01UE]+)|(request)$"
+        }
+      },
+      "optional": false
+    },
+    "request": {
+      "type": "array",
+      "title": "Request Components",
+      "description": "A list of component/output pin names. If a component name appears in this list, it's value will be reported on every simulation step.",
+      "optional": true
+    },
+    "clock": {
+      "type": "string",
+      "title": "Clock Pin",
+      "description": "The name of a 1-bit input pin. This pin will be toggled to 0 and then 1 between each simulation step.",
+      "optional": true
+    }
+  }
+}

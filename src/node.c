@@ -8,41 +8,28 @@
 #include <string.h>
 
 void di_node_changed(DiNode *node, DiSimulation *simulation) {
-    DiTerminal **values = di_terminal_list_values(&node->connections);
-
     di_signal_copy(&node->last_signal, &node->signal);
 
-    di_signal_fill(&node->signal, DI_BIT_UNKNOWN);
+    di_node_value(node, &node->signal, NULL);
 
-    uint64_t *signal_values = di_signal_get_values(&node->signal);
-    uint64_t *signal_error = di_signal_get_error(&node->signal);
-    uint64_t *signal_unknown = di_signal_get_unknown(&node->signal);
+    if (!di_signal_equal(&node->signal, &node->last_signal)) {
+        di_simulation_add(simulation, node);
+    }
+}
+
+void di_node_value(DiNode *node, DiSignal *output, DiTerminal *excluding) {
+    DiTerminal **values = di_terminal_list_values(&node->connections);
+
+    di_signal_fill(output, DI_BIT_UNKNOWN);
 
     for (size_t a = 0; a < node->connections.count; a++) {
         DiTerminal *terminal = values[a];
 
-        if (!terminal->holding) {
+        if (!terminal->holding || terminal == excluding) {
             continue;
         }
 
-        uint64_t *terminal_values = di_signal_get_values(&terminal->signal);
-        uint64_t *terminal_error = di_signal_get_error(&terminal->signal);
-        uint64_t *terminal_unknown = di_signal_get_unknown(&terminal->signal);
-
-        for (size_t i = 0; i < DI_SIGNAL_U64_COUNT(node->bits); i++) {
-            uint64_t error = signal_error[i] | terminal_error[i] |
-                             (~(signal_unknown[i] | terminal_unknown[i]) & (signal_values[i] ^ terminal_values[i]));
-            uint64_t unknown = signal_unknown[i] & terminal_unknown[i] & ~error;
-            uint64_t value = signal_values[i] | terminal_values[i] & ~error;
-
-            signal_values[i] = value;
-            signal_error[i] = error;
-            signal_unknown[i] = unknown;
-        }
-    }
-
-    if (!di_signal_equal(&node->signal, &node->last_signal)) {
-        di_simulation_add(simulation, node);
+        di_signal_merge(output, output, &terminal->signal);
     }
 }
 
@@ -50,11 +37,6 @@ void di_node_propagate(DiNode *node, DiSimulation *simulation) {
     DiTerminal **values = di_terminal_list_values(&node->connections);
 
     for (size_t a = 0; a < node->connections.count; a++) {
-        // Ignore holding connection (we don't need to send it back!)
-        if (values[a]->holding) {
-            continue;
-        }
-
         di_element_changed(values[a]->parent, simulation);
     }
 }

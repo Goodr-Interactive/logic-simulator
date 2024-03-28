@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from logisim.pinouts import Pinout, PinIdentifier
+from logisim.pinouts import Pinout, PinIdentifier, splitter_bit_per_pin
 from logisim.project import LogisimCircuit, LogisimWire, LogisimComponent
 
 from typing import Optional
 from dataclasses import dataclass
 
-from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal
+from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter
 from digisim import GATE_AND, GATE_OR, GATE_XOR, GATE_XOR_ANY, GATE_NAND, GATE_NOR, GATE_XNOR, GATE_XNOR_ANY
 
 
@@ -39,6 +39,17 @@ def create_register_element(attributes: dict[str, str]) -> Element:
     return Register(width)
 
 
+def create_splitter_element(attributes: dict[str, str]) -> Element:
+    width = int(attributes.get('incoming', '2'))
+    fanout = int(attributes.get('fanout', '2'))
+
+    splits = splitter_bit_per_pin(fanout, attributes)
+
+    assert sum(splits) == width
+
+    return Splitter(width, fanout, splits)
+
+
 # Input/Output Pins have a special role
 @dataclass
 class AssembledPin:
@@ -64,6 +75,7 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
             attr, GATE_XNOR if attr.get('xor') == 'odd' else GATE_XNOR_ANY),
         'NOT Gate': create_not_element,
         'Register': create_register_element,
+        'Splitter': create_splitter_element,
     }
 
     element_factory = element_map.get(component.component)
