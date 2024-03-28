@@ -101,6 +101,9 @@ def build_truth_table(args: Namespace):
 
     assemble, io = AssembledCircuit.assemble(circuit, project.circuits)
 
+    if len(assemble.unconnected) > 0:
+        print(f'Unconnected pins: {assemble.unconnected}')
+
     name_id = 0
 
     header = []
