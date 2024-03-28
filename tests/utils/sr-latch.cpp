@@ -11,8 +11,8 @@ SrLatch::SrLatch() {
 
     di_output_init(&value, 1);
 
-    di_or_init(&first, 1);
-    di_or_init(&second, 1);
+    di_gate_init(&first, DI_GATE_OP_OR, 1, 2);
+    di_gate_init(&second, DI_GATE_OP_OR, 1, 2);
 
     di_not_init(&firstNegate, 1);
     di_not_init(&secondNegate, 1);
@@ -25,10 +25,10 @@ SrLatch::SrLatch() {
     di_node_init(&secondNegateToFirst, 1);
 
     di_connect(&setToFirst, &set.output);
-    di_connect(&setToFirst, &first.input_a);
+    di_connect(&setToFirst, di_gate_inputs_get(&first.inputs, 0));
 
     di_connect(&resetToSecond, &reset.output);
-    di_connect(&resetToSecond, &second.input_b);
+    di_connect(&resetToSecond, di_gate_inputs_get(&second.inputs, 1));
 
     di_connect(&firstToFirstNegate, &first.output);
     di_connect(&firstToFirstNegate, &firstNegate.input);
@@ -37,10 +37,10 @@ SrLatch::SrLatch() {
     di_connect(&secondToSecondNegate, &secondNegate.input);
 
     di_connect(&firstNegateToSecond, &firstNegate.output);
-    di_connect(&firstNegateToSecond, &second.input_a);
+    di_connect(&firstNegateToSecond, di_gate_inputs_get(&second.inputs, 0));
 
     di_connect(&secondNegateToFirst, &secondNegate.output);
-    di_connect(&secondNegateToFirst, &first.input_b);
+    di_connect(&secondNegateToFirst, di_gate_inputs_get(&first.inputs, 1));
 }
 
 SrLatch::~SrLatch() {
@@ -51,8 +51,8 @@ SrLatch::~SrLatch() {
     di_node_destroy(&firstNegateToSecond);
     di_node_destroy(&secondNegateToFirst);
 
-    di_or_destroy(&first);
-    di_or_destroy(&second);
+    di_gate_destroy(&first);
+    di_gate_destroy(&second);
 
     di_not_destroy(&firstNegate);
     di_not_destroy(&secondNegate);

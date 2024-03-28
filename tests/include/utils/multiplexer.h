@@ -12,9 +12,9 @@ struct Multiplexer {
     DiInput a{};
     DiInput b{};
     DiInput c{};
-    DiAnd and1{};
-    DiAnd and2{};
-    DiOr sum{};
+    DiGate and1{};
+    DiGate and2{};
+    DiGate sum{};
     DiNot flip{};
     DiOutput f{};
 

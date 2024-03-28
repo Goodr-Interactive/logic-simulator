@@ -21,7 +21,7 @@ typedef struct di_terminal_t DiTerminal;
  *
  * DiTerminals on this list are propagated to when a node changes value.
  */
-typedef struct di_node_connections_t {
+typedef struct di_terminal_list_t {
     /**
      * The number of terminals currently connected to the node.
      */

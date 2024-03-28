@@ -161,38 +161,41 @@ cdef extern from "digisim/simulations/zero-delay.h":
     void di_zero_simulation_init(DiZeroSimulation *simulation)
     void di_zero_simulation_destroy(DiZeroSimulation *simulation)
 
-cdef extern from "digisim/elements/and.h":
-    ctypedef struct DiAnd:
+cdef extern from "digisim/utility/gate_inputs.h":
+    ctypedef union DiGateInputsContent:
+        DiTerminal local[2]
+        DiTerminal *heap
+
+
+    ctypedef struct DiGateInputs:
+        size_t count
+        DiGateInputsContent content
+
+    DiTerminal *di_gate_inputs_get(DiGateInputs *inputs, size_t index)
+
+    void di_gate_inputs_init(DiGateInputs *inputs, size_t count)
+    void di_gate_inputs_destroy(DiGateInputs *inputs)
+
+cdef extern from "digisim/elements/gate.h":
+    ctypedef enum DiGateOp:
+        DI_GATE_OP_AND = 0,
+        DI_GATE_OP_OR = 1,
+        DI_GATE_OP_XOR = 2,
+        DI_GATE_OP_XOR_ANY = 3
+        DI_GATE_OP_NAND = 4,
+        DI_GATE_OP_NOR = 5,
+        DI_GATE_OP_XNOR = 6,
+        DI_GATE_OP_XNOR_ANY = 7,
+
+    ctypedef struct DiGate:
         DiElement element
+        DiGateOp op
         size_t bits
-        DiTerminal input_a
-        DiTerminal input_b
+        DiGateInputs inputs
         DiTerminal output
 
-    void di_and_init(DiAnd *self, size_t bits)
-    void di_and_destroy(DiAnd *self)
-
-cdef extern from "digisim/elements/xor.h":
-    ctypedef struct DiXor:
-        DiElement element
-        size_t bits
-        DiTerminal input_a
-        DiTerminal input_b
-        DiTerminal output
-
-    void di_xor_init(DiXor *self, size_t bits)
-    void di_xor_destroy(DiXor *self)
-
-cdef extern from "digisim/elements/or.h":
-    ctypedef struct DiOr:
-        DiElement element
-        size_t bits
-        DiTerminal input_a
-        DiTerminal input_b
-        DiTerminal output
-
-    void di_or_init(DiOr *self, size_t bits)
-    void di_or_destroy(DiOr *self)
+    void di_gate_init(DiGate *self, DiGateOp op, size_t bits, size_t input_count)
+    void di_gate_destroy(DiGate *self)
 
 cdef extern from "digisim/elements/not.h":
     ctypedef struct DiNot:

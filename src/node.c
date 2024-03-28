@@ -74,7 +74,10 @@ void di_connect_simulate(DiNode *node, DiTerminal *connection, DiSimulation *sim
     connection->node = node;
     di_terminal_list_add(&node->connections, connection);
 
-    di_node_changed(node, simulation);
+    // Changing the wire signal value without a simulation can cause a change that will never be propagated.
+    if (simulation) {
+        di_node_changed(node, simulation);
+    }
 }
 
 void di_disconnect_simulate(DiNode *node, DiTerminal *connection, DiSimulation *simulation) {
@@ -82,7 +85,9 @@ void di_disconnect_simulate(DiNode *node, DiTerminal *connection, DiSimulation *
 
     di_terminal_list_remove(&node->connections, connection);
 
-    di_node_changed(node, simulation);
+    if (simulation) {
+        di_node_changed(node, simulation);
+    }
 }
 
 void di_connect(DiNode *node, DiTerminal *connection) { di_connect_simulate(node, connection, NULL); }
