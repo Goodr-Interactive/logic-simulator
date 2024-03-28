@@ -16,7 +16,6 @@ cdef extern from "digisim/signal.h":
 
         DiSignalContent content
 
-    DiBit di_bit_logical(bint value)
     bint di_bit_value(DiBit bit, bint default_value)
     DiBit di_signal_get(DiSignal *signal, size_t index)
     void di_signal_set(DiSignal *signal, size_t index, DiBit bit)
@@ -254,3 +253,29 @@ cdef extern from "digisim/elements/buffer.h":
 
     void di_buffer_init(DiBuffer *self, size_t bits)
     void di_buffer_destroy(DiBuffer *self)
+
+cdef extern from "digisim/elements/connector.h":
+    ctypedef struct DiConnector:
+        DiElement element
+        size_t bits
+        DiTerminal connection_a
+        DiTerminal connection_b
+        DiSignal signal_a
+        DiSignal signal_b
+
+    void di_connector_init(DiConnector *connector, size_t bits)
+    void di_connector_destroy(DiConnector *connector)
+
+cdef extern from "digisim/elements/splitter.h":
+    ctypedef struct DiSplitter:
+        DiElement element
+        size_t bits
+        DiTerminal end
+        size_t split_count
+        DiTerminal *splits
+        DiSignal split_accumulator
+        DiSignal end_signal
+        DiSignal *split_signals
+
+    void di_splitter_init(DiSplitter *splitter, size_t bits, size_t split_count, const size_t *splits)
+    void di_splitter_destroy(DiSplitter *splitter)
