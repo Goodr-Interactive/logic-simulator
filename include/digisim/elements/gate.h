@@ -24,8 +24,16 @@ typedef enum di_gate_op {
     DI_GATE_OP_OR,
     /**
      * Bitwise XOR operation between inputs (a ^ b).
+     *
+     * True when an odd number of inputs are true.
      */
     DI_GATE_OP_XOR,
+    /**
+     * Bitwise XOR operation between inputs.
+     *
+     * True if exactly one of the inputs are true.
+     */
+    DI_GATE_OP_XOR_ANY,
     /**
      * Bitwise NAND operation between inputs ~(a & b).
      */
@@ -36,8 +44,16 @@ typedef enum di_gate_op {
     DI_GATE_OP_NOR,
     /**
      * Bitwise XNOR operation between inputs ~(a ^ b).
+     *
+     * False when an odd number of inputs are true.
      */
     DI_GATE_OP_XNOR,
+    /**
+     * Bitwise XNOR operation between inputs.
+     *
+     * False if exactly one of the inputs are true.
+     */
+     DI_GATE_OP_XNOR_ANY,
 } DiGateOp;
 
 /**

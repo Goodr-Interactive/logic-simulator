@@ -44,4 +44,24 @@ struct BinaryGate {
     ~BinaryGate();
 };
 
+struct TertiaryGate {
+    DiInput a;
+    DiInput b;
+    DiInput c;
+    DiOutput f;
+
+    DiNode aToGate;
+    DiNode bToGate;
+    DiNode cToGate;
+    DiNode gateToF;
+
+    void setInputs(DiSimulation *simulation, DiBit aValue, DiBit bValue, DiBit cValue);
+
+    std::optional<DiBit> simulate(DiBit aValue, DiBit bValue, DiBit cValue);
+    std::optional<DiBit> simulate(DiSimulation *simulation, DiBit aValue, DiBit bValue, DiBit cValue);
+
+    TertiaryGate(DiTerminal *first, DiTerminal *second, DiTerminal *third, DiTerminal *output);
+    ~TertiaryGate();
+};
+
 #endif // DIGISIM_GATES_H
