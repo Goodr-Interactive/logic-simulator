@@ -44,7 +44,7 @@ def facing_to_normal_direction(facing: str) -> tuple[int, int]:
     return 0, 0
 
 
-def create_binary_gate_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+def create_binary_gate_pinout(position: tuple[int, int], attributes: dict[str, str], height_offset: int = 0) -> Pinout:
     x, y = position
 
     size = int(attributes.get('size', '50'))
@@ -52,6 +52,7 @@ def create_binary_gate_pinout(position: tuple[int, int], attributes: dict[str, s
     width = int(attributes.get('width', '1'))
 
     size_half = size // 20 * 10
+    size += height_offset  # XOR gates are a bit longer
 
     dir_x, dir_y = facing_to_direction(facing)
     norm_x, norm_y = facing_to_normal_direction(facing)
@@ -113,6 +114,7 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
     pinout_map = {
         'AND Gate': create_binary_gate_pinout,
         'OR Gate': create_binary_gate_pinout,
+        'XOR Gate': lambda p, a: create_binary_gate_pinout(p, a, 10),
         'NOT Gate': create_unary_gate_pinout,
         'Pin': create_pin_pinout,
         'Register': create_register_pinout,

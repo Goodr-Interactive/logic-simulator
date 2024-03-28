@@ -23,6 +23,7 @@ def bit_to_bin_string(bit: int) -> str:
 
     return 'X'
 
+
 def bin_string_to_bit(text: str) -> int:
     if text == '0':
         return BIT_LOW
@@ -44,7 +45,6 @@ def state_entry_to_bin_string(state: Optional[list[int]]) -> str:
         return 'ASTABLE'
     else:
         return ''.join(bit_to_bin_string(v) for v in state)
-
 
 
 def parse_bin_string_to_state_entry(text: str) -> list[int]:
@@ -97,12 +97,9 @@ def build_truth_table(args: Namespace):
     else:
         circuit = project.circuits[args.circuit]
 
-    steps = 10000 if args.max_steps is None else args.max_steps
+    steps = int('10000' if args.max_steps is None else args.max_steps)
 
-    assemble = AssembledCircuit(circuit)
-
-    inputs = assemble.inputs()
-    outputs = assemble.outputs()
+    assemble, io = AssembledCircuit.assemble(circuit, project.circuits)
 
     name_id = 0
 
@@ -111,7 +108,7 @@ def build_truth_table(args: Namespace):
 
     state = []
 
-    for name, value in inputs:
+    for name, value in io.inputs:
         if name is None:
             header.append(f'input_{name_id}')
 
@@ -121,7 +118,7 @@ def build_truth_table(args: Namespace):
 
         state.append([BIT_LOW] * value.bits())
 
-    for name, _ in outputs:
+    for name, _ in io.outputs:
         if name is None:
             header.append(f'output_{name_id}')
 
@@ -134,8 +131,8 @@ def build_truth_table(args: Namespace):
     while True:
         simulation.clear()
 
-        for i in range(len(inputs)):
-            _, value = inputs[i]
+        for i in range(len(io.inputs)):
+            _, value = io.inputs[i]
             element = state[i]
 
             for k in range(len(element)):
@@ -147,7 +144,7 @@ def build_truth_table(args: Namespace):
 
         row: list[Optional[list[int]]] = [element.copy() for element in state]
 
-        for _, output in outputs:
+        for _, output in io.outputs:
             if dead:
                 row.append(None)
             else:
@@ -167,7 +164,7 @@ def build_truth_table(args: Namespace):
             'pins': [
                 {
                     'name': name,
-                    'kind': 'input' if i < len(inputs) else 'output'
+                    'kind': 'input' if i < len(io.inputs) else 'output'
                 }
 
                 for i, name in enumerate(header)
@@ -192,9 +189,9 @@ def build_waveform(args: Namespace):
     else:
         circuit = project.circuits[args.circuit]
 
-    steps = 10000 if args.max_steps is None else args.max_steps
+    steps = int('10000' if args.max_steps is None else args.max_steps)
 
-    assemble = AssembledCircuit(circuit)
+    assemble, io = AssembledCircuit.assemble(circuit, project.circuits)
 
     wave_file = json.load(args.waveform)
 
@@ -307,7 +304,6 @@ def build_waveform(args: Namespace):
         print(json.dumps({
             'steps': results
         }))
-
 
 
 def main():

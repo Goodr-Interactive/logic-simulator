@@ -10,7 +10,7 @@ def parse_point(point: str) -> tuple[int, int]:
 
 
 class LogisimComponent:
-    library: str
+    library: Optional[str]
     component: str
 
     position: tuple[int, int]
@@ -24,7 +24,12 @@ class LogisimComponent:
         self.position = cast(tuple[int, int], parse_point(root.get('loc')))
         self.attributes = {a.get('name'): a.get('val') for a in root.findall('./a')}
 
-        self.pinout = create_pinout(self.component, self.position, self.attributes)
+        # None library should mean custom component (e.g. project circuit)
+        # We can't possibly determine the pinout until we build the circuit
+        if self.library is not None:
+            self.pinout = create_pinout(self.component, self.position, self.attributes)
+        else:
+            self.pinout = {}
 
 
 class LogisimWire:

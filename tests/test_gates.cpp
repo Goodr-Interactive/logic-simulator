@@ -99,6 +99,46 @@ TEST_CASE("Test OR Gate High") {
     di_or_destroy(&gate);
 }
 
+TEST_CASE("Test XOR Gate Low") {
+    DiXor gate;
+
+    di_xor_init(&gate, 1);
+
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_LOW, DI_BIT_LOW, DI_BIT_LOW);
+
+    di_xor_destroy(&gate);
+}
+
+TEST_CASE("Test XOR Gate Left High") {
+    DiXor gate;
+
+    di_xor_init(&gate, 1);
+
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_HIGH, DI_BIT_LOW, DI_BIT_HIGH);
+
+    di_xor_destroy(&gate);
+}
+
+TEST_CASE("Test XOR Gate Right High") {
+    DiXor gate;
+
+    di_xor_init(&gate, 1);
+
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_LOW, DI_BIT_HIGH, DI_BIT_HIGH);
+
+    di_xor_destroy(&gate);
+}
+
+TEST_CASE("Test XOR Gate High") {
+    DiXor gate;
+
+    di_xor_init(&gate, 1);
+
+    testBinaryGate(&gate.input_a, &gate.input_b, &gate.output, DI_BIT_HIGH, DI_BIT_HIGH, DI_BIT_LOW);
+
+    di_xor_destroy(&gate);
+}
+
 TEST_CASE("Test NOT Gate Low") {
     DiNot gate;
 

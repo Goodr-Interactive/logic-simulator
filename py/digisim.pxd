@@ -173,6 +173,17 @@ cdef extern from "digisim/elements/and.h":
     void di_and_init(DiAnd *self, size_t bits)
     void di_and_destroy(DiAnd *self)
 
+cdef extern from "digisim/elements/xor.h":
+    ctypedef struct DiXor:
+        DiElement element
+        size_t bits
+        DiTerminal input_a
+        DiTerminal input_b
+        DiTerminal output
+
+    void di_xor_init(DiXor *self, size_t bits)
+    void di_xor_destroy(DiXor *self)
+
 cdef extern from "digisim/elements/or.h":
     ctypedef struct DiOr:
         DiElement element
@@ -233,3 +244,13 @@ cdef extern from "digisim/elements/register.h":
 
     void di_register_init(DiRegister *latch, size_t bits)
     void di_register_destroy(DiRegister *latch)
+
+cdef extern from "digisim/elements/buffer.h":
+    ctypedef struct DiBuffer:
+        DiElement element
+        size_t bits
+        DiTerminal input
+        DiTerminal output
+
+    void di_buffer_init(DiBuffer *self, size_t bits)
+    void di_buffer_destroy(DiBuffer *self)
