@@ -36,6 +36,20 @@ typedef struct di_connector_t {
      * Second merge input for the connector
      */
     DiTerminal connection_b;
+
+    /**
+     * Temporary holding value for connection_a.
+     *
+     * For internal use.
+     */
+    DiSignal signal_a;
+
+    /**
+     * Temporary holding value for connection_b.
+     *
+     * For internal use.
+     */
+    DiSignal signal_b;
 } DiConnector;
 
 /**
