@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "title": "Truth Table",
+  "description": "Truth table analysis result of a circuit",
+  "type": "object",
+  "properties": {
+    "pins": {
+      "title": "Detected Pins",
+      "description": "Ordered list of detected pins. The ordering should be the same as the component ordering in the logisim file (allowing for some inference on pin purpose, e.g. if there are 3 pins).",
+      "type": "object",
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "title": "Input Pin Name",
+            "description": "If this pin is unnamed in the file, it may be assigned a name like input_X, where X is some incremental number.",
+            "type": "string"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "title": "Output Pin Name",
+            "description": "If this pin is unnamed in the file, it may be assigned a name like output_X, where X is some incremental number.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "values": {
+      "title": "Truth Table Rows",
+      "description": "Each element in this array is a row, where inputs are set to a unique combination, and the output pins are available.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "This object has one key for each input/output pin, with an associated value.",
+        "additionalProperties": {
+          "type": "string",
+          "title": "Signal Value",
+          "description": "This value is either a binary string with MSB first (e.g. 10010101), or the string \"ASTABLE\" in which case the circuit did not stabilize in the number of steps provided.",
+          "pattern": "^([01UE]+)|(ASTABLE)$"
+        }
+      }
+    }
+  }
+}

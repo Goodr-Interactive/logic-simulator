@@ -23,6 +23,7 @@ def bit_to_bin_string(bit: int) -> str:
 
     return 'X'
 
+
 def bin_string_to_bit(text: str) -> int:
     if text == '0':
         return BIT_LOW
@@ -44,7 +45,6 @@ def state_entry_to_bin_string(state: Optional[list[int]]) -> str:
         return 'ASTABLE'
     else:
         return ''.join(bit_to_bin_string(v) for v in state)
-
 
 
 def parse_bin_string_to_state_entry(text: str) -> list[int]:
@@ -97,45 +97,49 @@ def build_truth_table(args: Namespace):
     else:
         circuit = project.circuits[args.circuit]
 
-    steps = 10000 if args.max_steps is None else args.max_steps
+    steps = int('10000' if args.max_depth is None else args.max_depth)
 
-    assemble = AssembledCircuit(circuit)
+    assemble, io = AssembledCircuit.assemble(circuit, project.circuits)
 
-    inputs = assemble.inputs()
-    outputs = assemble.outputs()
+    if len(assemble.unconnected) > 0:
+        print(f'Unconnected pins: {assemble.unconnected}')
 
     name_id = 0
 
     header = []
     entries = []
 
+    header_inputs = []
+    header_outputs = []
+
     state = []
 
-    for name, value in inputs:
+    for name, value in io.inputs:
         if name is None:
-            header.append(f'input_{name_id}')
-
+            name = f'input_{name_id}'
             name_id += 1
-        else:
-            header.append(name)
+
+        header.append(name)
+        header_inputs.append(name)
 
         state.append([BIT_LOW] * value.bits())
 
-    for name, _ in outputs:
+    for name, _ in io.outputs:
         if name is None:
-            header.append(f'output_{name_id}')
+            name = f'output_{name_id}'
 
             name_id += 1
-        else:
-            header.append(name)
+
+        header.append(name)
+        header_outputs.append(name)
 
     simulation = Simulation()
 
     while True:
         simulation.clear()
 
-        for i in range(len(inputs)):
-            _, value = inputs[i]
+        for i in range(len(io.inputs)):
+            _, value = io.inputs[i]
             element = state[i]
 
             for k in range(len(element)):
@@ -147,7 +151,7 @@ def build_truth_table(args: Namespace):
 
         row: list[Optional[list[int]]] = [element.copy() for element in state]
 
-        for _, output in outputs:
+        for _, output in io.outputs:
             if dead:
                 row.append(None)
             else:
@@ -164,14 +168,10 @@ def build_truth_table(args: Namespace):
         print(state_to_col_table(header, entries))
     else:
         print(json.dumps({
-            'pins': [
-                {
-                    'name': name,
-                    'kind': 'input' if i < len(inputs) else 'output'
-                }
-
-                for i, name in enumerate(header)
-            ],
+            'pins': {
+                'inputs': header_inputs,
+                'outputs': header_outputs,
+            },
             'values': [
                 {
                     header[i]: state_entry_to_bin_string(value)
@@ -192,9 +192,9 @@ def build_waveform(args: Namespace):
     else:
         circuit = project.circuits[args.circuit]
 
-    steps = 10000 if args.max_steps is None else args.max_steps
+    steps = int('10000' if args.max_depth is None else args.max_depth)
 
-    assemble = AssembledCircuit(circuit)
+    assemble, io = AssembledCircuit.assemble(circuit, project.circuits)
 
     wave_file = json.load(args.waveform)
 
@@ -309,7 +309,6 @@ def build_waveform(args: Namespace):
         }))
 
 
-
 def main():
     parser = ArgumentParser(
         prog='digisim',
@@ -321,14 +320,14 @@ def main():
     table = subparsers.add_parser('table', help='Generate Truth Table')
     table.add_argument('file', type=FileType('r', encoding='UTF-8'))
     table.add_argument('--circuit')
-    table.add_argument('--max-steps')
+    table.add_argument('--max-depth')
     table.add_argument('--readable', action='store_true')
 
     wave = subparsers.add_parser('wave', help='Generate Waveform')
     wave.add_argument('file', type=FileType('r', encoding='UTF-8'))
     wave.add_argument('--waveform', type=FileType('r', encoding='UTF-8'), required=True)
     wave.add_argument('--circuit', required=False)
-    wave.add_argument('--max-steps')
+    wave.add_argument('--max-depth')
     wave.add_argument('--readable', action='store_true')
 
     args = parser.parse_args()

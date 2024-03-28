@@ -6,6 +6,8 @@ extern "C" {
 #include <digisim/simulations/unit-delay.h>
 }
 
+// Not really behaviour I'd like to require.
+/*
 TEST_CASE("Test SR Latch Is Astable") {
     SrLatch latch;
 
@@ -20,6 +22,7 @@ TEST_CASE("Test SR Latch Is Astable") {
 
     di_unit_simulation_destroy(&simulation);
 }
+ */
 
 TEST_CASE("Test SR Latch Ordering") {
     SrLatch latch;

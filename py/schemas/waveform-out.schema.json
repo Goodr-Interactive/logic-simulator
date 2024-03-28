@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "title": "Waveform Output",
+  "description": "The output of the wave command, describing the state of a circuit after each step in a sequence of inputs.",
+  "type": "object",
+  "properties": {
+    "steps": {
+      "type": "array",
+      "title": "Step Results",
+      "description": "Array containing the states of the requested outputs after each sequence. The length of this array should be the same as the length of the `waveform` property in the waveform input file.",
+      "items": {
+        "type": "object",
+        "title": "Pin Values",
+        "description": "Mapping from pin/register name to their value. Either a bit string or ASTABLE if the simulation did not converge.",
+        "additionalProperties": {
+          "type": "string",
+          "pattern": "^([01UE]+)|(ASTABLE)$"
+        }
+      }
+    }
+  }
+}

@@ -124,4 +124,13 @@ void di_terminal_fill(DiTerminal *terminal, DiBit bit, DiSimulation *simulation)
  */
 DiSignal *di_terminal_read(DiTerminal *terminal);
 
+/**
+ * Similar to di_terminal_read, except the current held value of the terminal does not affect the value of the read.
+ * If the terminal is unconnected, then output will be initialized to DI_BIT_UNKNOWN.
+ *
+ * @param terminal The terminal to read from.
+ * @param output The signal to store the output of the read. Should have the same number of bits as terminal.
+ */
+void di_terminal_directional_read(DiTerminal *terminal, DiSignal *output);
+
 #endif // DIGISIM_TERMINAL_H

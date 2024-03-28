@@ -16,7 +16,6 @@ cdef extern from "digisim/signal.h":
 
         DiSignalContent content
 
-    DiBit di_bit_logical(bint value)
     bint di_bit_value(DiBit bit, bint default_value)
     DiBit di_signal_get(DiSignal *signal, size_t index)
     void di_signal_set(DiSignal *signal, size_t index, DiBit bit)
@@ -173,6 +172,17 @@ cdef extern from "digisim/elements/and.h":
     void di_and_init(DiAnd *self, size_t bits)
     void di_and_destroy(DiAnd *self)
 
+cdef extern from "digisim/elements/xor.h":
+    ctypedef struct DiXor:
+        DiElement element
+        size_t bits
+        DiTerminal input_a
+        DiTerminal input_b
+        DiTerminal output
+
+    void di_xor_init(DiXor *self, size_t bits)
+    void di_xor_destroy(DiXor *self)
+
 cdef extern from "digisim/elements/or.h":
     ctypedef struct DiOr:
         DiElement element
@@ -233,3 +243,39 @@ cdef extern from "digisim/elements/register.h":
 
     void di_register_init(DiRegister *latch, size_t bits)
     void di_register_destroy(DiRegister *latch)
+
+cdef extern from "digisim/elements/buffer.h":
+    ctypedef struct DiBuffer:
+        DiElement element
+        size_t bits
+        DiTerminal input
+        DiTerminal output
+
+    void di_buffer_init(DiBuffer *self, size_t bits)
+    void di_buffer_destroy(DiBuffer *self)
+
+cdef extern from "digisim/elements/connector.h":
+    ctypedef struct DiConnector:
+        DiElement element
+        size_t bits
+        DiTerminal connection_a
+        DiTerminal connection_b
+        DiSignal signal_a
+        DiSignal signal_b
+
+    void di_connector_init(DiConnector *connector, size_t bits)
+    void di_connector_destroy(DiConnector *connector)
+
+cdef extern from "digisim/elements/splitter.h":
+    ctypedef struct DiSplitter:
+        DiElement element
+        size_t bits
+        DiTerminal end
+        size_t split_count
+        DiTerminal *splits
+        DiSignal split_accumulator
+        DiSignal end_signal
+        DiSignal *split_signals
+
+    void di_splitter_init(DiSplitter *splitter, size_t bits, size_t split_count, const size_t *splits)
+    void di_splitter_destroy(DiSplitter *splitter)
