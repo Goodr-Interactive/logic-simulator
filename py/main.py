@@ -97,7 +97,7 @@ def build_truth_table(args: Namespace):
     else:
         circuit = project.circuits[args.circuit]
 
-    steps = int('10000' if args.max_steps is None else args.max_steps)
+    steps = int('10000' if args.max_depth is None else args.max_depth)
 
     assemble, io = AssembledCircuit.assemble(circuit, project.circuits)
 
@@ -109,25 +109,29 @@ def build_truth_table(args: Namespace):
     header = []
     entries = []
 
+    header_inputs = []
+    header_outputs = []
+
     state = []
 
     for name, value in io.inputs:
         if name is None:
-            header.append(f'input_{name_id}')
-
+            name = f'input_{name_id}'
             name_id += 1
-        else:
-            header.append(name)
+
+        header.append(name)
+        header_inputs.append(name)
 
         state.append([BIT_LOW] * value.bits())
 
     for name, _ in io.outputs:
         if name is None:
-            header.append(f'output_{name_id}')
+            name = f'output_{name_id}'
 
             name_id += 1
-        else:
-            header.append(name)
+
+        header.append(name)
+        header_outputs.append(name)
 
     simulation = Simulation()
 
@@ -164,14 +168,10 @@ def build_truth_table(args: Namespace):
         print(state_to_col_table(header, entries))
     else:
         print(json.dumps({
-            'pins': [
-                {
-                    'name': name,
-                    'kind': 'input' if i < len(io.inputs) else 'output'
-                }
-
-                for i, name in enumerate(header)
-            ],
+            'pins': {
+                'inputs': header_inputs,
+                'outputs': header_outputs,
+            },
             'values': [
                 {
                     header[i]: state_entry_to_bin_string(value)
@@ -192,7 +192,7 @@ def build_waveform(args: Namespace):
     else:
         circuit = project.circuits[args.circuit]
 
-    steps = int('10000' if args.max_steps is None else args.max_steps)
+    steps = int('10000' if args.max_depth is None else args.max_depth)
 
     assemble, io = AssembledCircuit.assemble(circuit, project.circuits)
 
@@ -320,14 +320,14 @@ def main():
     table = subparsers.add_parser('table', help='Generate Truth Table')
     table.add_argument('file', type=FileType('r', encoding='UTF-8'))
     table.add_argument('--circuit')
-    table.add_argument('--max-steps')
+    table.add_argument('--max-depth')
     table.add_argument('--readable', action='store_true')
 
     wave = subparsers.add_parser('wave', help='Generate Waveform')
     wave.add_argument('file', type=FileType('r', encoding='UTF-8'))
     wave.add_argument('--waveform', type=FileType('r', encoding='UTF-8'), required=True)
     wave.add_argument('--circuit', required=False)
-    wave.add_argument('--max-steps')
+    wave.add_argument('--max-depth')
     wave.add_argument('--readable', action='store_true')
 
     args = parser.parse_args()
