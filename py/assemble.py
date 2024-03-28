@@ -7,7 +7,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal
-from digisim import GATE_AND, GATE_OR, GATE_XOR, GATE_NAND, GATE_NOR, GATE_XNOR
+from digisim import GATE_AND, GATE_OR, GATE_XOR, GATE_XOR_ANY, GATE_NAND, GATE_NOR, GATE_XNOR, GATE_XNOR_ANY
 
 
 def create_logic_gate_element(attributes: dict[str, str], op: int) -> Element:
@@ -56,10 +56,12 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
     element_map = {
         'AND Gate': lambda attr: create_logic_gate_element(attr, GATE_AND),
         'OR Gate': lambda attr: create_logic_gate_element(attr, GATE_OR),
-        'XOR Gate': lambda attr: create_logic_gate_element(attr, GATE_XOR),
+        'XOR Gate': lambda attr: create_logic_gate_element(
+            attr, GATE_XOR if attr.get('xor') == 'odd' else GATE_XOR_ANY),
         'NAND Gate': lambda attr: create_logic_gate_element(attr, GATE_NAND),
         'NOR Gate': lambda attr: create_logic_gate_element(attr, GATE_NOR),
-        'XNOR Gate': lambda attr: create_logic_gate_element(attr, GATE_XNOR),
+        'XNOR Gate': lambda attr: create_logic_gate_element(
+            attr, GATE_XNOR if attr.get('xor') == 'odd' else GATE_XNOR_ANY),
         'NOT Gate': create_not_element,
         'Register': create_register_element,
     }

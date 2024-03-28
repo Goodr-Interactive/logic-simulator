@@ -182,9 +182,11 @@ cdef extern from "digisim/elements/gate.h":
         DI_GATE_OP_AND = 0,
         DI_GATE_OP_OR = 1,
         DI_GATE_OP_XOR = 2,
-        DI_GATE_OP_NAND = 3,
-        DI_GATE_OP_NOR = 4,
-        DI_GATE_OP_XNOR = 5,
+        DI_GATE_OP_XOR_ANY = 3
+        DI_GATE_OP_NAND = 4,
+        DI_GATE_OP_NOR = 5,
+        DI_GATE_OP_XNOR = 6,
+        DI_GATE_OP_XNOR_ANY = 7,
 
     ctypedef struct DiGate:
         DiElement element

@@ -10,9 +10,11 @@ BIT_UNKNOWN = 4
 GATE_AND = 0
 GATE_OR = 1
 GATE_XOR = 2
-GATE_NAND = 3
-GATE_NOR = 4
-GATE_XNOR = 5
+GATE_XOR_ANY = 3
+GATE_NAND = 4
+GATE_NOR = 5
+GATE_XNOR = 6
+GATE_XNOR_ANY = 7
 
 cdef class Simulation:
     cdef DiSimulation *simulation
