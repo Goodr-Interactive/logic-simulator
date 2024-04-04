@@ -49,6 +49,25 @@ class LogisimCircuit:
 
         return None
 
+    def add_wire(self, from_loc: tuple[int, int], to_loc: tuple[int, int]):
+        from_wire = self.wire_at(from_loc)
+        to_wire = self.wire_at(to_loc)
+
+        if from_wire and to_wire:
+            if from_wire is not to_wire:
+                from_wire.endpoints = from_wire.endpoints.union(to_wire.endpoints)
+
+                self.wires.remove(to_wire)
+        elif from_wire:
+            from_wire.endpoints.add(to_loc)
+        elif to_wire:
+            to_wire.endpoints.add(from_loc)
+        else:
+            wire_object = LogisimWire()
+            wire_object.endpoints = {from_loc, to_loc}
+
+            self.wires.append(wire_object)
+
     def __init__(self, root: etree.Element):
         self.name = root.get('name')
 
@@ -61,24 +80,14 @@ class LogisimCircuit:
             from_loc = parse_point(wire.get('from'))
             to_loc = parse_point(wire.get('to'))
 
-            from_wire = self.wire_at(from_loc)
-            to_wire = self.wire_at(to_loc)
-
-            if from_wire and to_wire:
-                from_wire.endpoints = from_wire.endpoints.union(to_wire.endpoints)
-
-                self.wires.remove(to_wire)
-            elif from_wire:
-                from_wire.endpoints.add(to_loc)
-            elif to_wire:
-                to_wire.endpoints.add(from_loc)
-            else:
-                wire_object = LogisimWire()
-                wire_object.endpoints = {from_loc, to_loc}
-
-                self.wires.append(wire_object)
+            self.add_wire(from_loc, to_loc)
 
         self.components = [LogisimComponent(comp) for comp in components]
+
+        # Connect components at the same spot even if there is no physical wire.
+        for component in self.components:
+            for position in component.pinout:
+                self.add_wire(position, position)
 
 
 class LogisimProject:
