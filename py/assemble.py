@@ -6,8 +6,9 @@ from logisim.project import LogisimCircuit, LogisimWire, LogisimComponent
 from typing import Optional
 from dataclasses import dataclass
 
-from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter
+from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter, BitExtender
 from digisim import GATE_AND, GATE_OR, GATE_XOR, GATE_XOR_ANY, GATE_NAND, GATE_NOR, GATE_XNOR, GATE_XNOR_ANY
+from digisim import EXTENDER_POLICY_ONE, EXTENDER_POLICY_SIGN, EXTENDER_POLICY_ZERO
 
 
 def create_logic_gate_element(attributes: dict[str, str], op: int) -> Element:
@@ -50,6 +51,25 @@ def create_splitter_element(attributes: dict[str, str]) -> Element:
     return Splitter(width, fanout, splits)
 
 
+def create_bit_extender_element(attributes: dict[str, str]) -> Element:
+    in_width = int(attributes.get('in_width', '8'))
+    out_width = int(attributes.get('out_width', '16'))
+
+    kind = attributes.get('type', 'sign')
+
+    if kind == 'one':
+        policy = EXTENDER_POLICY_ONE
+    elif kind == 'zero':
+        policy = EXTENDER_POLICY_ZERO
+    elif kind == 'sign':
+        policy = EXTENDER_POLICY_SIGN
+    else:
+        print(f"Unknown extender type {kind}.")
+
+        policy = EXTENDER_POLICY_SIGN
+
+    return BitExtender(policy, in_width, out_width)
+
 # Input/Output Pins have a special role
 @dataclass
 class AssembledPin:
@@ -76,6 +96,7 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
         'NOT Gate': create_not_element,
         'Register': create_register_element,
         'Splitter': create_splitter_element,
+        'Bit Extender': create_bit_extender_element,
     }
 
     element_factory = element_map.get(component.component)
@@ -383,6 +404,8 @@ class AssembledCircuit:
 
                         if node is None:
                             node = Node(pin.bits)
+
+                        assert terminal.bits() == node.bits()
 
                         node.connect(terminal)
 

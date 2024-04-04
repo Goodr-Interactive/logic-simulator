@@ -282,3 +282,20 @@ cdef extern from "digisim/elements/splitter.h":
 
     void di_splitter_init(DiSplitter *splitter, size_t bits, size_t split_count, const size_t *splits)
     void di_splitter_destroy(DiSplitter *splitter)
+
+cdef extern from "digisim/elements/bit-extender.h":
+    ctypedef enum DiBitExtenderPolicy:
+        DI_BIT_EXTENDER_POLICY_ZERO = 0,
+        DI_BIT_EXTENDER_POLICY_ONE = 1,
+        DI_BIT_EXTENDER_POLICY_SIGN = 2,
+
+    ctypedef struct DiBitExtender:
+        DiElement element
+        DiBitExtenderPolicy policy
+        size_t in_bits
+        size_t out_bits
+        DiTerminal input
+        DiTerminal output
+
+    void di_bit_extender_init(DiBitExtender *extender, DiBitExtenderPolicy policy, size_t in_bits, size_t out_bits)
+    void di_bit_extender_destroy(DiBitExtender *extender)

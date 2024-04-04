@@ -24,6 +24,7 @@ add_library(digisim
     include/digisim/elements/register.h
     include/digisim/elements/connector.h
     include/digisim/elements/splitter.h
+    include/digisim/elements/bit-extender.h
     include/digisim/utility/node-list.h
     include/digisim/utility/terminal-list.h
     include/digisim/utility/gate_inputs.h
@@ -48,6 +49,7 @@ add_library(digisim
     src/elements/register.c
     src/elements/connector.c
     src/elements/splitter.c
+    src/elements/bit-extender.c
     src/utility/node-list.c
     src/utility/terminal-list.c
     src/utility/gate_inputs.c
