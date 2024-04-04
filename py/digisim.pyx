@@ -47,6 +47,9 @@ cdef class Terminal:
     cdef DiTerminal *terminal
     cdef object parent
 
+    def bits(self) -> int:
+        return self.terminal.bits
+
     def term_id(self) -> int:
         return <size_t>self.terminal
 
@@ -62,7 +65,12 @@ cdef class Terminal:
 cdef class Node:
     cdef DiNode *node
 
+    def bits(self) -> int:
+        return self.node.bits
+
     def connect(self, terminal: Terminal):
+        assert self.node.bits == terminal.terminal.bits
+
         di_connect(self.node, terminal.terminal)
 
     def disconnect(self, terminal: Terminal):

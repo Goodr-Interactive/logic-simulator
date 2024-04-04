@@ -196,6 +196,18 @@ def create_splitter_pinout(position: tuple[int, int], attributes: dict[str, str]
     return result
 
 
+def create_bit_extender_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+    x, y = position
+
+    in_width = int(attributes.get('in_width', '8'))
+    out_width = int(attributes.get('out_width', '16'))
+
+    return {
+        (x - 40, y): PinIdentifier(name='input', bits=in_width),
+        (x, y): PinIdentifier(name='output', bits=out_width)
+    }
+
+
 def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
     pinout_map = {
         'AND Gate': create_binary_gate_pinout,
@@ -208,6 +220,7 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
         'Pin': create_pin_pinout,
         'Register': create_register_pinout,
         'Splitter': create_splitter_pinout,
+        'Bit Extender': create_bit_extender_pinout,
     }
 
     pinout_factory = pinout_map.get(gate)
