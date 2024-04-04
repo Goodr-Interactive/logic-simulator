@@ -134,15 +134,15 @@ def create_pin_pinout(position: tuple[int, int], attributes: dict[str, str]) -> 
         }
 
 
-def create_register_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+def create_register_pinout(position: tuple[int, int], attributes: dict[str, str], default_width: str = '8') -> Pinout:
     x, y = position
 
-    width = int(attributes.get('width', '8'))
+    width = int(attributes.get('width', default_width))
 
     return {
-        (x, y + 30): PinIdentifier(name='data', bits=width),
-        (x + 60, y + 30): PinIdentifier(name='value', bits=width),
-        (x, y + 70): PinIdentifier(name='clock', bits=1),
+        (x - 10, y + 10): PinIdentifier(name='data', bits=width),
+        (x + 50, y + 10): PinIdentifier(name='value', bits=width),
+        (x - 10, y + 50): PinIdentifier(name='clock', bits=1),
     }
 
 
@@ -224,8 +224,8 @@ def create_multiplexer_pinout(position: tuple[int, int], attributes: dict[str, s
         result[(origin_x + norm_x * 10, origin_y + norm_y * 10)] = PinIdentifier(name='input', index=0, bits=width)
         result[(origin_x - norm_x * 10, origin_y - norm_y * 10)] = PinIdentifier(name='input', index=1, bits=width)
 
-        select_x = origin_x - ((dir_x * size // 10) // 2) * 10 - norm_x * 20 * select_loc_mul
-        select_y = origin_y - ((dir_y * size // 10) // 2) * 10 - norm_y * 20 * select_loc_mul
+        select_x = origin_x - dir_x * 10 - norm_x * 20 * select_loc_mul
+        select_y = origin_y - dir_y * 10 - norm_y * 20 * select_loc_mul
 
         result[(select_x, select_y)] = PinIdentifier(name='select', bits=select)
     else:
@@ -261,6 +261,7 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
         'Register': create_register_pinout,
         'Splitter': create_splitter_pinout,
         'Multiplexer': create_multiplexer_pinout,
+        'D Flip-Flop': lambda p, a: create_register_pinout(p, a, '1'),
     }
 
     pinout_factory = pinout_map.get(gate)

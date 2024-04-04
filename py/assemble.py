@@ -33,8 +33,8 @@ def create_pin_element(attributes: dict[str, str]) -> Element:
         return Input(width)
 
 
-def create_register_element(attributes: dict[str, str]) -> Element:
-    width = int(attributes.get('width', '8'))
+def create_register_element(attributes: dict[str, str], default_value: str = '8') -> Element:
+    width = int(attributes.get('width', default_value))
 
     return Register(width)
 
@@ -84,6 +84,7 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
         'Register': create_register_element,
         'Splitter': create_splitter_element,
         'Multiplexer': create_multiplexer_element,
+        'D Flip-Flop': lambda attr: create_register_element(attr, '1'),
     }
 
     element_factory = element_map.get(component.component)
