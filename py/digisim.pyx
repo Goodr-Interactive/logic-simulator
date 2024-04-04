@@ -439,3 +439,29 @@ cdef class Arithmetic(Element):
         di_arithmetic_destroy(self.arithmetic)
 
         PyMem_Free(self.arithmetic)
+
+
+cdef class Multiplexer(Element):
+    cdef DiMultiplexer *multiplexer
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "input":
+            assert index is not None and index < self.multiplexer.input_count
+
+            return Terminal.create(self, &self.multiplexer.inputs[index])
+
+        if name == "output":
+            return Terminal.create(self, &self.multiplexer.output)
+
+        if name == "select":
+            return Terminal.create(self, &self.multiplexer.select)
+
+    def __init__(self, data_bits: int, select_bits: int):
+        self.multiplexer = <DiMultiplexer *> PyMem_Malloc(sizeof(DiMultiplexer))
+
+        di_multiplexer_init(self.multiplexer, data_bits, select_bits)
+
+    def __del__(self):
+        di_multiplexer_destroy(self.multiplexer)
+
+        PyMem_Free(self.multiplexer)
