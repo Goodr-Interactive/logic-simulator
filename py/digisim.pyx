@@ -16,6 +16,11 @@ GATE_NOR = 5
 GATE_XNOR = 6
 GATE_XNOR_ANY = 7
 
+ARITHMETIC_OP_ADD = 0
+ARITHMETIC_OP_SUB = 1
+ARITHMETIC_OP_MUL = 2
+ARITHMETIC_OP_MUL_SIGNED = 3
+
 cdef class Simulation:
     cdef DiSimulation *simulation
     cdef DiZeroSimulation *zero
