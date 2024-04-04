@@ -135,6 +135,8 @@ def build_truth_table(args: Namespace):
 
     simulation = Simulation()
 
+    assemble.shake(simulation)
+
     while True:
         simulation.clear()
 
@@ -213,6 +215,8 @@ def build_waveform(args: Namespace):
         clock = value
 
     simulation = Simulation()
+
+    assemble.shake(simulation)
 
     results = []
 
