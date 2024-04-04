@@ -364,6 +364,8 @@ cdef class Splitter(Element):
 
         di_splitter_init(self.splitter, bits, split_count, split_array)
 
+        values = [self.splitter.splits[i].bits for i in range(split_count)]
+
     def __del__(self):
         di_splitter_destroy(self.splitter)
 
