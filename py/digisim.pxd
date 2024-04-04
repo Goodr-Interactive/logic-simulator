@@ -282,3 +282,16 @@ cdef extern from "digisim/elements/splitter.h":
 
     void di_splitter_init(DiSplitter *splitter, size_t bits, size_t split_count, const size_t *splits)
     void di_splitter_destroy(DiSplitter *splitter)
+
+cdef extern from "digisim/elements/multiplexer.h":
+    ctypedef struct DiMultiplexer:
+        DiElement element
+        size_t select_bits
+        size_t data_bits
+        size_t input_count
+        DiTerminal *inputs
+        DiTerminal select
+        DiTerminal output
+
+    void di_multiplexer_init(DiMultiplexer *multiplexer, size_t data_bits, size_t select_bits)
+    void di_multiplexer_destroy(DiMultiplexer *multiplexer)
