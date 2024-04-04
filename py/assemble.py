@@ -6,7 +6,7 @@ from logisim.project import LogisimCircuit, LogisimWire, LogisimComponent
 from typing import Optional
 from dataclasses import dataclass
 
-from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter, BitExtender
+from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter, ConstantValue, BitExtender, Simulation
 from digisim import GATE_AND, GATE_OR, GATE_XOR, GATE_XOR_ANY, GATE_NAND, GATE_NOR, GATE_XNOR, GATE_XNOR_ANY
 from digisim import EXTENDER_POLICY_ONE, EXTENDER_POLICY_SIGN, EXTENDER_POLICY_ZERO
 
@@ -70,6 +70,14 @@ def create_bit_extender_element(attributes: dict[str, str]) -> Element:
 
     return BitExtender(policy, in_width, out_width)
 
+
+def create_constant_element(attributes: dict[str, str], default_value: str = '0x1') -> Element:
+    width = int(attributes.get('width', '1'))
+    value = int(attributes.get('value', default_value), 0)
+
+    return ConstantValue(width, value)
+
+
 # Input/Output Pins have a special role
 @dataclass
 class AssembledPin:
@@ -97,6 +105,9 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
         'Register': create_register_element,
         'Splitter': create_splitter_element,
         'Bit Extender': create_bit_extender_element,
+        'Constant': create_constant_element,
+        'Power': create_constant_element,
+        'Ground': lambda attr: create_constant_element(attr, '0x0'),
     }
 
     element_factory = element_map.get(component.component)
@@ -214,6 +225,10 @@ class AssembledCircuit:
                 result.append((element.component.attributes.get('label'), element.element))
 
         return result
+
+    def shake(self, simulation: Simulation):
+        for element in self.elements:
+            element.element.change(simulation)
 
     def burn_inputs(self) -> AssembledIO:
         inputs = []
