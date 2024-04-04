@@ -18,5 +18,6 @@
 #include <digisim/elements/sr-latch.h>
 #include <digisim/elements/connector.h>
 #include <digisim/elements/splitter.h>
+#include <digisim/elements/bit-extender.h>
 
 #endif // DIGISIM_ELEMENTS_ALL_H
