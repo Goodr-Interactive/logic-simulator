@@ -79,6 +79,12 @@ cdef class Node:
 
 
 cdef class Element:
+    def change(self, simulation: Simulation):
+        pass
+
+    def reset(self):
+        pass
+
     def terminal(self, name: str, index: Optional[int]) -> Terminal:
         raise NotImplementedError
 
@@ -89,6 +95,9 @@ cdef class InsightElement(Element):
 
 cdef class LogicGate(Element):
     cdef DiGate *gate
+
+    def change(self, simulation: Simulation):
+        di_element_changed(&self.gate.element, simulation.simulation)
 
     def terminal(self, name: str, index: Optional[int]) -> Terminal:
         if name == "inputs":
@@ -111,6 +120,9 @@ cdef class LogicGate(Element):
 
 cdef class NotGate(Element):
     cdef DiNot *gate
+
+    def change(self, simulation: Simulation):
+        di_element_changed(&self.gate.element, simulation.simulation)
 
     def terminal(self, name: str, index: Optional[int]) -> Terminal:
         if name == "input":
@@ -147,6 +159,9 @@ def bit_to_bin_string(bit: int) -> str:
 cdef class Input(InsightElement):
     cdef DiInput *gate
 
+    def change(self, simulation: Simulation):
+        di_element_changed(&self.gate.element, simulation.simulation)
+
     def terminal(self, name: str, index: Optional[int]) -> Terminal:
         if name == "output":
             return Terminal.create(self, &self.gate.output)
@@ -182,6 +197,9 @@ cdef class Input(InsightElement):
 cdef class Output(InsightElement):
     cdef DiOutput *gate
 
+    def change(self, simulation: Simulation):
+        di_element_changed(&self.gate.element, simulation.simulation)
+
     def terminal(self, name: str, index: Optional[int]) -> Terminal:
         if name == "input":
             return Terminal.create(self, &self.gate.input)
@@ -213,6 +231,12 @@ cdef class Output(InsightElement):
 
 cdef class Register(InsightElement):
     cdef DiRegister *reg
+
+    def change(self, simulation: Simulation):
+        di_element_changed(&self.reg.element, simulation.simulation)
+
+    def reset(self):
+        di_element_reset(&self.reg.element)
 
     def terminal(self, name: str, index: Optional[int]) -> Terminal:
         if name == "data":
@@ -246,6 +270,9 @@ cdef class Register(InsightElement):
 cdef class Buffer(Element):
     cdef DiBuffer *buffer
 
+    def change(self, simulation: Simulation):
+        di_element_changed(&self.buffer.element, simulation.simulation)
+
     def terminal(self, name: str, index: Optional[int]) -> Terminal:
         if name == "input":
             return Terminal.create(self, &self.buffer.input)
@@ -269,6 +296,9 @@ cdef class Buffer(Element):
 
 cdef class Connector(Element):
     cdef DiConnector *connector
+
+    def change(self, simulation: Simulation):
+        di_element_changed(&self.connector.element, simulation.simulation)
 
     def terminal(self, name: str, index: Optional[int]) -> Terminal:
         if name == "input":
@@ -294,6 +324,9 @@ cdef class Connector(Element):
 cdef class Splitter(Element):
     cdef DiSplitter *splitter
 
+    def change(self, simulation: Simulation):
+        di_element_changed(&self.splitter.element, simulation.simulation)
+
     def terminal(self, name: str, index: Optional[int]) -> Terminal:
         if name == "end":
             return Terminal.create(self, &self.splitter.end)
@@ -317,3 +350,24 @@ cdef class Splitter(Element):
         di_splitter_destroy(self.splitter)
 
         PyMem_Free(self.splitter)
+
+
+cdef class ConstantValue(Element):
+    cdef DiConstant *constant
+
+    def change(self, simulation: Simulation):
+        di_element_changed(&self.constant.element, simulation.simulation)
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "output":
+            return Terminal.create(self, &self.constant.output)
+
+    def __init__(self, bits: int, value: int):
+        self.constant = <DiConstant *> PyMem_Malloc(sizeof(DiConstant))
+
+        di_constant_init(self.constant, bits, value)
+
+    def __del__(self):
+        di_constant_destroy(self.constant)
+
+        PyMem_Free(self.constant)

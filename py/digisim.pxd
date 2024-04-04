@@ -92,7 +92,7 @@ cdef extern from "digisim/element.h":
         DiTerminalList connections
 
     void di_element_changed(DiElement *element, DiSimulation *simulation)
-    void di_element_reset(DiElement *element, DiSimulation *simulation)
+    void di_element_reset(DiElement *element)
     void di_element_disconnect_all(DiElement *element, DiSimulation *simulation)
     void di_element_init(DiElement *element)
     void di_element_destroy(DiElement *element)
@@ -282,3 +282,14 @@ cdef extern from "digisim/elements/splitter.h":
 
     void di_splitter_init(DiSplitter *splitter, size_t bits, size_t split_count, const size_t *splits)
     void di_splitter_destroy(DiSplitter *splitter)
+
+cdef extern from "digisim/elements/constant.h":
+    ctypedef struct DiConstant:
+        DiElement element
+        size_t bits
+        uint64_t value
+        DiTerminal output
+
+    void di_constant_emit(DiConstant *constant, DiSimulation *simulation)
+    void di_constant_init(DiConstant *constant, size_t bits, uint64_t value)
+    void di_constant_destroy(DiConstant *constant)
