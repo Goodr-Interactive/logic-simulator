@@ -75,6 +75,7 @@ cdef class Node:
 
     def connect(self, terminal: Terminal):
         assert self.node.bits == terminal.terminal.bits
+        assert terminal.terminal.node == NULL
 
         di_connect(self.node, terminal.terminal)
 

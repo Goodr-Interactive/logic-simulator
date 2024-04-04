@@ -146,19 +146,16 @@ def create_register_pinout(position: tuple[int, int], attributes: dict[str, str]
     }
 
 
-def splitter_bit_per_pin(fanout: int, attributes: dict[str, str]) -> list[int]:
+def splitter_bit_per_pin(fanout: int, width: int, attributes: dict[str, str]) -> list[int]:
     result = [0] * fanout
 
-    for i in range(fanout):
+    for i in range(width):
         bit_name = f'bit{i}'
 
-        value = attributes.get(bit_name, i)
+        value = int(attributes.get(bit_name, i))
 
-        if value is not None:
-            value = int(value)
-
-            if value < fanout:
-                result[value] += 1
+        if value < fanout:
+            result[value] += 1
 
     return result
 
@@ -183,7 +180,7 @@ def create_splitter_pinout(position: tuple[int, int], attributes: dict[str, str]
     norm_x, norm_y = facing_to_normal_direction(facing)
     norm_x, norm_y = norm_x * norm_multiplier * spacing * 10, norm_y * norm_multiplier * spacing * 10
 
-    bits = splitter_bit_per_pin(fanout, attributes)
+    bits = splitter_bit_per_pin(fanout, width, attributes)
 
     for i in range(fanout):
         pin_x = dir_x + norm_x * (i + 1) + x
