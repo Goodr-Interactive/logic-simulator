@@ -44,7 +44,8 @@ def state_entry_to_bin_string(state: Optional[list[int]]) -> str:
     if state is None:
         return 'ASTABLE'
     else:
-        return ''.join(bit_to_bin_string(v) for v in state)
+        # MSB is left most, so we do index 2 first, then 1, then 0, hence we have reversed
+        return ''.join(bit_to_bin_string(v) for v in reversed(state))
 
 
 def parse_bin_string_to_state_entry(text: str) -> list[int]:

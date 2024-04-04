@@ -30,10 +30,10 @@ def facing_to_direction(facing: str) -> tuple[int, int]:
 
 def facing_to_normal_direction(facing: str) -> tuple[int, int]:
     if facing == 'south':
-        return -1, 0
+        return +1, 0
 
     if facing == 'north':
-        return +1, 0
+        return -1, 0
 
     if facing == 'east':
         return 0, -1
@@ -180,13 +180,17 @@ def create_splitter_pinout(position: tuple[int, int], attributes: dict[str, str]
     norm_x, norm_y = facing_to_normal_direction(facing)
     norm_x, norm_y = norm_x * norm_multiplier * spacing * 10, norm_y * norm_multiplier * spacing * 10
 
+    is_order_reversed = norm_x > 0 or norm_y < 0
+
     bits = splitter_bit_per_pin(fanout, width, attributes)
 
     for i in range(fanout):
         pin_x = dir_x + norm_x * (i + 1) + x
         pin_y = dir_y + norm_y * (i + 1) + y
 
-        result[(pin_x, pin_y)] = PinIdentifier(name='split', index=i, bits=bits[i])
+        ordered_i = fanout - 1 - i if is_order_reversed else i
+
+        result[(pin_x, pin_y)] = PinIdentifier(name='split', index=ordered_i, bits=bits[ordered_i])
 
     return result
 
