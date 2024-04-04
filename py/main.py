@@ -137,6 +137,7 @@ def build_truth_table(args: Namespace):
     simulation = Simulation()
 
     assemble.shake(simulation)
+    simulation.simulate(steps)
 
     while True:
         simulation.clear()
@@ -218,6 +219,7 @@ def build_waveform(args: Namespace):
     simulation = Simulation()
 
     assemble.shake(simulation)
+    simulation.simulate(steps)
 
     results = []
 

@@ -8,10 +8,10 @@ void di_arithmetic_changed(DiElement *element, DiSimulation *simulation) {
     DiArithmetic *self = (DiArithmetic *)element;
 
     DiSignal *in_a = di_terminal_read(&self->in_a);
-    DiSignal *in_b = di_terminal_read(&self->in_a);
+    DiSignal *in_b = di_terminal_read(&self->in_b);
 
-    uint64_t value_a = di_signal_get_values(in_a)[0] & DI_SIGNED_TOP_MASK(self->bits);
-    uint64_t value_b = di_signal_get_values(in_b)[0] & DI_SIGNED_TOP_MASK(self->bits);
+    uint64_t value_a = di_signal_get_values(in_a)[0] & ~DI_SIGNED_TOP_MASK(self->bits);
+    uint64_t value_b = di_signal_get_values(in_b)[0] & ~DI_SIGNED_TOP_MASK(self->bits);
 
     uint64_t value;
 

@@ -310,3 +310,21 @@ cdef extern from "digisim/elements/constant.h":
     void di_constant_emit(DiConstant *constant, DiSimulation *simulation)
     void di_constant_init(DiConstant *constant, size_t bits, uint64_t value)
     void di_constant_destroy(DiConstant *constant)
+
+cdef extern from "digisim/elements/arithmetic.h":
+    ctypedef enum DiArithmeticOp:
+        DI_ARITHMETIC_OP_ADD = 0,
+        DI_ARITHMETIC_OP_SUB = 1,
+        DI_ARITHMETIC_OP_MUL = 2,
+        DI_ARITHMETIC_OP_MUL_SIGNED = 3,
+
+    ctypedef struct DiArithmetic:
+        DiElement element
+        size_t bits
+        DiArithmeticOp op
+        DiTerminal in_a
+        DiTerminal in_b
+        DiTerminal output
+
+    void di_arithmetic_init(DiArithmetic *arithmetic, size_t bits, DiArithmeticOp op)
+    void di_arithmetic_destroy(DiArithmetic *arithmetic)

@@ -6,8 +6,9 @@ from logisim.project import LogisimCircuit, LogisimWire, LogisimComponent
 from typing import Optional
 from dataclasses import dataclass
 
-from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter, ConstantValue, BitExtender, Simulation
+from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter, ConstantValue, Arithmetic, BitExtender, Simulation
 from digisim import GATE_AND, GATE_OR, GATE_XOR, GATE_XOR_ANY, GATE_NAND, GATE_NOR, GATE_XNOR, GATE_XNOR_ANY
+from digisim import ARITHMETIC_OP_ADD, ARITHMETIC_OP_SUB, ARITHMETIC_OP_MUL, ARITHMETIC_OP_MUL_SIGNED
 from digisim import EXTENDER_POLICY_ONE, EXTENDER_POLICY_SIGN, EXTENDER_POLICY_ZERO
 
 
@@ -78,6 +79,28 @@ def create_constant_element(attributes: dict[str, str], default_value: str = '0x
     return ConstantValue(width, value)
 
 
+def create_arithmetic_element(attributes: dict[str, str], kind: str) -> Element:
+    width = int(attributes.get('width', '8'))
+
+    if kind == 'add':
+        op = ARITHMETIC_OP_ADD
+    elif kind == 'sub':
+        op = ARITHMETIC_OP_SUB
+    elif kind == 'mul':
+        mode = attributes.get('mode')
+
+        if mode == 'twosComplement':
+            op = ARITHMETIC_OP_MUL_SIGNED
+        else:
+            op = ARITHMETIC_OP_MUL
+    else:
+        op = ARITHMETIC_OP_ADD
+
+        print(f"Unknown arithmetic kind {kind}.")
+
+    return Arithmetic(width, op)
+
+
 # Input/Output Pins have a special role
 @dataclass
 class AssembledPin:
@@ -108,6 +131,9 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
         'Constant': create_constant_element,
         'Power': create_constant_element,
         'Ground': lambda attr: create_constant_element(attr, '0x0'),
+        'Adder': lambda attr: create_arithmetic_element(attr, 'add'),
+        'Subtractor': lambda attr: create_arithmetic_element(attr, 'sub'),
+        'Multiplier': lambda attr: create_arithmetic_element(attr, 'mul'),
     }
 
     element_factory = element_map.get(component.component)
