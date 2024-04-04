@@ -43,7 +43,7 @@ def create_splitter_element(attributes: dict[str, str]) -> Element:
     width = int(attributes.get('incoming', '2'))
     fanout = int(attributes.get('fanout', '2'))
 
-    splits = splitter_bit_per_pin(fanout, attributes)
+    splits = splitter_bit_per_pin(fanout, width, attributes)
 
     assert sum(splits) == width
 
