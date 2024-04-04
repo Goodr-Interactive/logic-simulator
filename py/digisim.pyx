@@ -4,8 +4,8 @@ from typing import Optional
 
 BIT_LOW = 0
 BIT_HIGH = 1
-BIT_ERROR = 3
-BIT_UNKNOWN = 4
+BIT_ERROR = 2
+BIT_UNKNOWN = 3
 
 GATE_AND = 0
 GATE_OR = 1

@@ -3,9 +3,9 @@ from libc.stdint cimport uint64_t
 cdef extern from "digisim/signal.h":
     ctypedef enum DiBit:
         DI_BIT_LOW = 0b00
-        DI_BIT_UNKNOWN = 0b01
+        DI_BIT_HIGH = 0b01
         DI_BIT_ERROR = 0b10
-        DI_BIT_HIGH = 0b11
+        DI_BIT_UNKNOWN = 0b11
 
     ctypedef union DiSignalContent:
         uint64_t local
