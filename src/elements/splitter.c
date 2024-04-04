@@ -1,7 +1,7 @@
 #include <digisim/elements/splitter.h>
 
-#include <stdlib.h>
 #include <assert.h>
+#include <stdlib.h>
 
 void di_splitter_accumulate(DiSignal *out, size_t count, DiTerminal *terminals, DiSignal *signals) {
     size_t bit_count = 0;
@@ -40,10 +40,8 @@ void di_splitter_changed(DiElement *element, DiSimulation *simulation) {
     di_terminal_directional_read(&splitter->end, &splitter->end_signal);
 
     di_splitter_accumulate(&splitter->split_accumulator, splitter->split_count, splitter->splits, splitter->split_signals);
-    di_signal_merge(&splitter->split_accumulator, &splitter->split_accumulator, &splitter->end_signal);
-
+    di_splitter_spread(&splitter->end_signal, splitter->split_count, splitter->splits);
     di_signal_copy(&splitter->end.signal, &splitter->split_accumulator);
-    di_splitter_spread(&splitter->split_accumulator, splitter->split_count, splitter->splits);
 
     di_terminal_send(&splitter->end, simulation);
 

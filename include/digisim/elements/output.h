@@ -47,7 +47,7 @@ typedef struct di_output_t {
  * @param output Pointer to initialize
  * @param bits Bit-size for the output terminal
  */
-void di_output_init(DiOutput *input, size_t bits);
+void di_output_init(DiOutput *output, size_t bits);
 
 /**
  * Destroy a DiOutput struct.
@@ -55,7 +55,7 @@ void di_output_init(DiOutput *input, size_t bits);
  * @memberof DiOutput
  * @param output Pointer to destroy
  */
-void di_output_destroy(DiOutput *input);
+void di_output_destroy(DiOutput *output);
 
 /**
  * Returns the bit at `index` being put through this output.
@@ -65,6 +65,6 @@ void di_output_destroy(DiOutput *input);
  * @param index Index of the bit. (index < `input->bits`)
  * @return The value of the bit at this index
  */
-DiBit di_output_get_bit(DiOutput *input, size_t index);
+DiBit di_output_get_bit(DiOutput *output, size_t index);
 
 #endif // DIGISIM_ELEMENTS_OUTPUT_H
