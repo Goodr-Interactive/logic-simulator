@@ -16,6 +16,10 @@ GATE_NOR = 5
 GATE_XNOR = 6
 GATE_XNOR_ANY = 7
 
+EXTENDER_POLICY_ZERO = 0
+EXTENDER_POLICY_ONE = 1
+EXTENDER_POLICY_SIGN = 2
+
 cdef class Simulation:
     cdef DiSimulation *simulation
     cdef DiZeroSimulation *zero
@@ -317,3 +321,24 @@ cdef class Splitter(Element):
         di_splitter_destroy(self.splitter)
 
         PyMem_Free(self.splitter)
+
+
+cdef class BitExtender(Element):
+    cdef DiBitExtender *extender
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "input":
+            return Terminal.create(self, &self.extender.input)
+
+        if name == "output":
+            return Terminal.create(self, &self.extender.output)
+
+    def __init__(self, policy: int, in_bits: int, out_bits: int):
+        self.extender = <DiBitExtender *> PyMem_Malloc(sizeof(DiBitExtender))
+
+        di_bit_extender_init(self.extender, policy, in_bits, out_bits)
+
+    def __del__(self):
+        di_bit_extender_destroy(self.extender)
+
+        PyMem_Free(self.extender)
