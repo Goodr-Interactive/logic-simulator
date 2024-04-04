@@ -56,7 +56,7 @@ def increment_state(state: list[list[bool]]) -> bool:
     for i in reversed(range(len(state))):
         element = state[i]
 
-        for k in reversed(range(len(element))):
+        for k in range(len(element)):
             if element[k] == BIT_HIGH:
                 element[k] = BIT_LOW
             else:
