@@ -69,9 +69,11 @@ def create_bit_extender_element(attributes: dict[str, str]) -> Element:
         policy = EXTENDER_POLICY_SIGN
 
     return BitExtender(policy, in_width, out_width)
-def create_constant_element(attributes: dict[str, str]) -> Element:
+
+
+def create_constant_element(attributes: dict[str, str], default_value: str = '0x1') -> Element:
     width = int(attributes.get('width', '1'))
-    value = int(attributes.get('value', '0x1'), 0)
+    value = int(attributes.get('value', default_value), 0)
 
     return ConstantValue(width, value)
 
@@ -104,6 +106,8 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
         'Splitter': create_splitter_element,
         'Bit Extender': create_bit_extender_element,
         'Constant': create_constant_element,
+        'Power': create_constant_element,
+        'Ground': lambda attr: create_constant_element(attr, '0x0'),
     }
 
     element_factory = element_map.get(component.component)
