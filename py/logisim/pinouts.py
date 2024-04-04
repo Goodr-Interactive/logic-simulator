@@ -214,6 +214,18 @@ def create_constant_pinout(position: tuple[int, int], attributes: dict[str, str]
     }
 
 
+def create_arithmetic_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+    x, y = position
+
+    width = int(attributes.get('width', '8'))
+
+    return {
+        (x - 40, y - 10): PinIdentifier(name='in_a', bits=width),
+        (x - 40, y + 10): PinIdentifier(name='in_b', bits=width),
+        (x, y): PinIdentifier(name='output', bits=width),
+    }
+
+
 def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
     pinout_map = {
         'AND Gate': create_binary_gate_pinout,
@@ -230,6 +242,9 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
         'Constant': create_constant_pinout,
         'Power': create_constant_pinout,
         'Ground': create_constant_pinout,
+        'Adder': create_arithmetic_pinout,
+        'Subtractor': create_arithmetic_pinout,
+        'Multiplier': create_arithmetic_pinout,
     }
 
     pinout_factory = pinout_map.get(gate)

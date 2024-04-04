@@ -20,6 +20,11 @@ EXTENDER_POLICY_ZERO = 0
 EXTENDER_POLICY_ONE = 1
 EXTENDER_POLICY_SIGN = 2
 
+ARITHMETIC_OP_ADD = 0
+ARITHMETIC_OP_SUB = 1
+ARITHMETIC_OP_MUL = 2
+ARITHMETIC_OP_MUL_SIGNED = 3
+
 cdef class Simulation:
     cdef DiSimulation *simulation
     cdef DiZeroSimulation *zero
