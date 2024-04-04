@@ -39,6 +39,8 @@ typedef struct di_constant_t {
 // TODO: May need functions to modify value in the future.
 // Right now this component lives up to its name of "constant."
 
+void di_constant_emit(DiConstant *constant, DiSimulation *simulation);
+
 /**
  * Initialize a DiConstant struct.
  *
