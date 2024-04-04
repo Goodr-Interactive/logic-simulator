@@ -5,12 +5,14 @@ add_executable(digisim-tests
     include/utils/astable.h
     include/utils/wire-fight.h
     include/utils/bit_string.h
+    include/utils/extender.h
     utils/gates.cpp
     utils/multiplexer.cpp
     utils/sr-latch.cpp
     utils/astable.cpp
     utils/wire-fight.cpp
     utils/bit_string.cpp
+    utils/extender.cpp
 
     test_signal.cpp
     test_multiplexer.cpp
@@ -20,6 +22,7 @@ add_executable(digisim-tests
     test_register.cpp
     test_fighting.cpp
     test_splitter.cpp
+    test_bit_extender.cpp
 )
 
 set_target_properties(digisim-tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
