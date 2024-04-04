@@ -6,7 +6,7 @@ from logisim.project import LogisimCircuit, LogisimWire, LogisimComponent
 from typing import Optional
 from dataclasses import dataclass
 
-from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter
+from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter, Multiplexer
 from digisim import GATE_AND, GATE_OR, GATE_XOR, GATE_XOR_ANY, GATE_NAND, GATE_NOR, GATE_XNOR, GATE_XNOR_ANY
 
 
@@ -50,6 +50,13 @@ def create_splitter_element(attributes: dict[str, str]) -> Element:
     return Splitter(width, fanout, splits)
 
 
+def create_multiplexer_element(attributes: dict[str, str]) -> Element:
+    width = int(attributes.get('width', '1'))
+    select = int(attributes.get('select', '1'))
+
+    return Multiplexer(width, select)
+
+
 # Input/Output Pins have a special role
 @dataclass
 class AssembledPin:
@@ -76,6 +83,7 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
         'NOT Gate': create_not_element,
         'Register': create_register_element,
         'Splitter': create_splitter_element,
+        'Multiplexer': create_multiplexer_element,
     }
 
     element_factory = element_map.get(component.component)

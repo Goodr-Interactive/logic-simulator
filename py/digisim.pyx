@@ -330,6 +330,9 @@ cdef class Multiplexer(Element):
         if name == "output":
             return Terminal.create(self, &self.multiplexer.output)
 
+        if name == "select":
+            return Terminal.create(self, &self.multiplexer.select)
+
     def __init__(self, data_bits: int, select_bits: int):
         self.multiplexer = <DiMultiplexer *> PyMem_Malloc(sizeof(DiMultiplexer))
 

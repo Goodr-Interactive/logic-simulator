@@ -196,6 +196,58 @@ def create_splitter_pinout(position: tuple[int, int], attributes: dict[str, str]
     return result
 
 
+def create_multiplexer_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+    width = int(attributes.get('width', '1'))
+    select = int(attributes.get('select', '1'))
+    facing = attributes.get('facing', 'east')
+    select_loc = attributes.get('selloc', 'bl')
+    size = int(attributes.get('size', '30' if select == 1 else '40'))
+
+    input_count = 2 ** select
+
+    select_loc_mul = 1 if select_loc == 'bl' else -1
+
+    x, y = position
+
+    dir_x, dir_y = facing_to_direction(facing)
+    norm_x, norm_y = facing_to_normal_direction(facing)
+    norm_x, norm_y = -abs(norm_x), -abs(norm_y)  # always go left or up
+
+    result = {
+        (x, y): PinIdentifier(name='output', bits=width)
+    }
+
+    origin_x = x + dir_x * size
+    origin_y = y + dir_y * size
+
+    if input_count == 2:
+        result[(origin_x + norm_x * 10, origin_y + norm_y * 10)] = PinIdentifier(name='input', index=0, bits=width)
+        result[(origin_x - norm_x * 10, origin_y - norm_y * 10)] = PinIdentifier(name='input', index=1, bits=width)
+
+        select_x = origin_x - ((dir_x * size // 10) // 2) * 10 - norm_x * 20 * select_loc_mul
+        select_y = origin_y - ((dir_y * size // 10) // 2) * 10 - norm_y * 20 * select_loc_mul
+
+        result[(select_x, select_y)] = PinIdentifier(name='select', bits=select)
+    else:
+        half_count = input_count // 2
+
+        first_pin_x = origin_x + norm_x * 10 * half_count
+        first_pin_y = origin_y + norm_y * 10 * half_count
+
+        for i in range(input_count):
+            pin_x = first_pin_x - norm_x * 10 * i
+            pin_y = first_pin_y - norm_y * 10 * i
+
+            result[(pin_x, pin_y)] = PinIdentifier(name='input', index=i, bits=width)
+
+        select_x = origin_x - ((dir_x * size // 10) // 2) * 10 - norm_x * 10 * half_count * select_loc_mul
+        select_y = origin_y - ((dir_y * size // 10) // 2) * 10 - norm_y * 10 * half_count * select_loc_mul
+
+        result[(select_x, select_y)] = PinIdentifier(name='select', bits=select)
+
+    return result
+
+
 def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
     pinout_map = {
         'AND Gate': create_binary_gate_pinout,
@@ -208,6 +260,7 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
         'Pin': create_pin_pinout,
         'Register': create_register_pinout,
         'Splitter': create_splitter_pinout,
+        'Multiplexer': create_multiplexer_pinout,
     }
 
     pinout_factory = pinout_map.get(gate)
