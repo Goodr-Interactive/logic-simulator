@@ -402,3 +402,30 @@ cdef class ConstantValue(Element):
         di_constant_destroy(self.constant)
 
         PyMem_Free(self.constant)
+
+
+cdef class Arithmetic(Element):
+    cdef DiArithmetic *arithmetic
+
+    def change(self, simulation: Simulation):
+        di_element_changed(&self.arithmetic.element, simulation.simulation)
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "in_a":
+            return Terminal.create(self, &self.arithmetic.in_a)
+
+        if name == "in_b":
+            return Terminal.create(self, &self.arithmetic.in_b)
+
+        if name == "output":
+            return Terminal.create(self, &self.arithmetic.output)
+
+    def __init__(self, bits: int, op: int):
+        self.arithmetic = <DiArithmetic *> PyMem_Malloc(sizeof(DiArithmetic))
+
+        di_arithmetic_init(self.arithmetic, bits, op)
+
+    def __del__(self):
+        di_arithmetic_destroy(self.arithmetic)
+
+        PyMem_Free(self.arithmetic)
