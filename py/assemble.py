@@ -50,9 +50,9 @@ def create_splitter_element(attributes: dict[str, str]) -> Element:
     return Splitter(width, fanout, splits)
 
 
-def create_constant_element(attributes: dict[str, str]) -> Element:
+def create_constant_element(attributes: dict[str, str], default_value: str = '0x1') -> Element:
     width = int(attributes.get('width', '1'))
-    value = int(attributes.get('value', '0x1'), 0)
+    value = int(attributes.get('value', default_value), 0)
 
     return ConstantValue(width, value)
 
@@ -84,6 +84,8 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
         'Register': create_register_element,
         'Splitter': create_splitter_element,
         'Constant': create_constant_element,
+        'Power': create_constant_element,
+        'Ground': lambda attr: create_constant_element(attr, '0x0'),
     }
 
     element_factory = element_map.get(component.component)

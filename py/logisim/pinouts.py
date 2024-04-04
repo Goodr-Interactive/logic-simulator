@@ -215,6 +215,8 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
         'Register': create_register_pinout,
         'Splitter': create_splitter_pinout,
         'Constant': create_constant_pinout,
+        'Power': create_constant_pinout,
+        'Ground': create_constant_pinout,
     }
 
     pinout_factory = pinout_map.get(gate)
