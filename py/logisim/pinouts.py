@@ -149,8 +149,6 @@ def create_register_pinout(position: tuple[int, int], attributes: dict[str, str]
 def splitter_bit_per_pin(fanout: int, attributes: dict[str, str]) -> list[int]:
     result = [0] * fanout
 
-    other = 0
-
     for i in range(fanout):
         bit_name = f'bit{i}'
 
@@ -196,6 +194,14 @@ def create_splitter_pinout(position: tuple[int, int], attributes: dict[str, str]
     return result
 
 
+def create_constant_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+    width = int(attributes.get('width', '1'))
+
+    return {
+        position: PinIdentifier(name='output', bits=width)
+    }
+
+
 def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
     pinout_map = {
         'AND Gate': create_binary_gate_pinout,
@@ -208,6 +214,7 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
         'Pin': create_pin_pinout,
         'Register': create_register_pinout,
         'Splitter': create_splitter_pinout,
+        'Constant': create_constant_pinout,
     }
 
     pinout_factory = pinout_map.get(gate)

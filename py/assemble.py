@@ -6,7 +6,7 @@ from logisim.project import LogisimCircuit, LogisimWire, LogisimComponent
 from typing import Optional
 from dataclasses import dataclass
 
-from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter
+from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter, ConstantValue, Simulation
 from digisim import GATE_AND, GATE_OR, GATE_XOR, GATE_XOR_ANY, GATE_NAND, GATE_NOR, GATE_XNOR, GATE_XNOR_ANY
 
 
@@ -50,6 +50,13 @@ def create_splitter_element(attributes: dict[str, str]) -> Element:
     return Splitter(width, fanout, splits)
 
 
+def create_constant_element(attributes: dict[str, str]) -> Element:
+    width = int(attributes.get('width', '1'))
+    value = int(attributes.get('value', '0x1'), 0)
+
+    return ConstantValue(width, value)
+
+
 # Input/Output Pins have a special role
 @dataclass
 class AssembledPin:
@@ -76,6 +83,7 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
         'NOT Gate': create_not_element,
         'Register': create_register_element,
         'Splitter': create_splitter_element,
+        'Constant': create_constant_element,
     }
 
     element_factory = element_map.get(component.component)
@@ -193,6 +201,10 @@ class AssembledCircuit:
                 result.append((element.component.attributes.get('label'), element.element))
 
         return result
+
+    def shake(self, simulation: Simulation):
+        for element in self.elements:
+            element.element.change(simulation)
 
     def burn_inputs(self) -> AssembledIO:
         inputs = []
