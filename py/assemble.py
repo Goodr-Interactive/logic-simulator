@@ -310,7 +310,7 @@ class AssembledCircuit:
             if pin.node:
                 pin.node.connect(terminal)
 
-            inputs.append(buffer)
+            inputs.append((buffer, pin.position))
 
             self.elements.append(AssembledElement(
                 pinout={},
@@ -326,13 +326,20 @@ class AssembledCircuit:
             if pin.node:
                 pin.node.connect(terminal)
 
-            outputs.append(buffer)
+            outputs.append((buffer, pin.position))
 
             self.elements.append(AssembledElement(
                 pinout={},
                 component=None,
                 element=buffer
             ))
+
+        # Sort by (y, x)
+        inputs = sorted(inputs, key=lambda x: (x[1][1], x[1][0]))
+        outputs = sorted(outputs, key=lambda x: (x[1][1], x[1][0]))
+
+        inputs = [x[0] for x in inputs]
+        outputs = [x[0] for x in outputs]
 
         return inputs, outputs
 
