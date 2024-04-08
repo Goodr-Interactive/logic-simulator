@@ -196,6 +196,9 @@ cdef class Input(InsightElement):
     def set(self, index: int, bit: int):
         di_signal_set(&self.gate.signal, index, bit)
 
+    def get(self, index: int) -> int:
+        return di_signal_get(&self.gate.signal, index)
+
     def emit(self, simulation: Simulation):
         di_input_emit(self.gate, simulation.simulation)
 

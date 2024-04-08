@@ -49,7 +49,7 @@ def state_entry_to_bin_string(state: Optional[list[int]]) -> str:
 
 
 def parse_bin_string_to_state_entry(text: str) -> list[int]:
-    return [bin_string_to_bit(c) for c in text]
+    return [bin_string_to_bit(c) for c in reversed(text)]
 
 
 def increment_state(state: list[list[bool]]) -> bool:
