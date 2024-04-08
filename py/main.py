@@ -316,6 +316,106 @@ def build_waveform(args: Namespace):
         }))
 
 
+def interaction(args: Namespace):
+    project = LogisimProject.parse(args.file)
+
+    if args.circuit is None:
+        circuit = project.circuits[project.main]
+    else:
+        circuit = project.circuits[args.circuit]
+
+    steps = int('10000' if args.max_depth is None else args.max_depth)
+
+    assemble, io = AssembledCircuit.assemble(circuit, project.circuits)
+
+    if len(assemble.unconnected) > 0:
+        print(f'Unconnected pins: {assemble.unconnected}')
+
+    header = []
+
+    name_id = 0
+
+    for name, value in io.inputs:
+        if name is None:
+            name = f'input_{name_id}'
+            name_id += 1
+
+        header.append(name)
+
+    for name, _ in io.outputs:
+        if name is None:
+            name = f'output_{name_id}'
+
+            name_id += 1
+
+        header.append(name)
+
+    simulation = Simulation()
+
+    assemble.shake(simulation)
+    simulation.simulate(steps)
+
+    dead = False
+
+    while True:
+        row = []
+
+        for name, value in io.inputs:
+            row.append([value.get(i) for i in range(value.bits())])
+
+        for _, output in io.outputs:
+            if dead:
+                row.append(None)
+            else:
+                value = [output.get(i) for i in range(output.bits())]
+
+                row.append(value)
+
+        row = [state_entry_to_bin_string(x) for x in row]
+        header_lengths = [max(len(header[i]), len(row[i])) for i in range(len(header))]
+
+        top = ' | '.join([header[i].ljust(header_lengths[i]) for i in range(len(header))])
+        bottom = ' | '.join([row[i].ljust(header_lengths[i]) for i in range(len(header))])
+        middle = '=' * len(top)
+
+        print(top)
+        print(middle)
+        print(bottom)
+
+        print("> ", end="")
+
+        command = input()
+        parts = [x.strip() for x in command.split("=")]
+
+        if len(parts) != 2:
+            print("Failed to parse command.")
+            continue
+
+        input_name = parts[0]
+        new_value = parse_bin_string_to_state_entry(parts[1])
+
+        input_value = assemble.by_label.get(input_name)
+
+        # We can only mutate input elements.
+        if not input_value or not isinstance(input_value, Input):
+            print(f'Component {input_name} does not exist or is not an input.')
+
+            continue
+
+        if len(new_value) != input_value.bits():
+            print(f'Component {input_name} is {input_value.bits()} wide but you entered {len(new_value)}.')
+
+            continue
+
+        for k in range(len(new_value)):
+            input_value.set(k, new_value[k])
+
+        input_value.emit(simulation)
+
+        dead = simulation.simulate(steps)
+
+
+
 def main():
     parser = ArgumentParser(
         prog='digisim',
@@ -337,6 +437,11 @@ def main():
     wave.add_argument('--max-depth')
     wave.add_argument('--readable', action='store_true')
 
+    interact = subparsers.add_parser('interact', help='Live Circuit Interaction')
+    interact.add_argument('file', type=FileType('r', encoding='UTF-8'))
+    interact.add_argument('--circuit', required=False)
+    interact.add_argument('--max-depth')
+
     args = parser.parse_args()
 
     if args.command == 'table':
@@ -344,6 +449,9 @@ def main():
 
     if args.command == 'wave':
         build_waveform(args)
+
+    if args.command == 'interact':
+        interaction(args)
 
 
 if __name__ == '__main__':
