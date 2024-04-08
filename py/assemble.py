@@ -6,7 +6,7 @@ from logisim.project import LogisimCircuit, LogisimWire, LogisimComponent
 from typing import Optional
 from dataclasses import dataclass
 
-from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter, BitExtender, ConstantValue, Arithmetic, Simulation
+from digisim import Node, Element, LogicGate, NotGate, Input, Output, Register, Buffer, InsightElement, Terminal, Splitter, Multiplexer, BitExtender, ConstantValue, Arithmetic, Simulation
 from digisim import GATE_AND, GATE_OR, GATE_XOR, GATE_XOR_ANY, GATE_NAND, GATE_NOR, GATE_XNOR, GATE_XNOR_ANY
 from digisim import EXTENDER_POLICY_ONE, EXTENDER_POLICY_SIGN, EXTENDER_POLICY_ZERO
 from digisim import ARITHMETIC_OP_ADD, ARITHMETIC_OP_SUB, ARITHMETIC_OP_MUL, ARITHMETIC_OP_MUL_SIGNED
@@ -35,10 +35,17 @@ def create_pin_element(attributes: dict[str, str]) -> Element:
         return Input(width)
 
 
-def create_register_element(attributes: dict[str, str]) -> Element:
-    width = int(attributes.get('width', '8'))
+def create_register_element(attributes: dict[str, str], default_value: str = '8') -> Element:
+    width = int(attributes.get('width', default_value))
 
     return Register(width)
+
+
+def create_multiplexer_element(attributes: dict[str, str]) -> Element:
+    width = int(attributes.get('width', '1'))
+    select = int(attributes.get('select', '1'))
+
+    return Multiplexer(width, select)
 
 
 def create_splitter_element(attributes: dict[str, str]) -> Element:
@@ -134,6 +141,8 @@ def create_element(component: LogisimComponent) -> Optional[Element]:
         'Adder': lambda attr: create_arithmetic_element(attr, 'add'),
         'Subtractor': lambda attr: create_arithmetic_element(attr, 'sub'),
         'Multiplier': lambda attr: create_arithmetic_element(attr, 'mul'),
+        'Multiplexer': create_multiplexer_element,
+        'D Flip-Flop': lambda attr: create_register_element(attr, '1'),
     }
 
     element_factory = element_map.get(component.component)

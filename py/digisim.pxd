@@ -299,6 +299,7 @@ cdef extern from "digisim/elements/bit-extender.h":
 
     void di_bit_extender_init(DiBitExtender *extender, DiBitExtenderPolicy policy, size_t in_bits, size_t out_bits)
     void di_bit_extender_destroy(DiBitExtender *extender)
+
 cdef extern from "digisim/elements/constant.h":
     ctypedef struct DiConstant:
         DiElement element
@@ -327,3 +328,16 @@ cdef extern from "digisim/elements/arithmetic.h":
 
     void di_arithmetic_init(DiArithmetic *arithmetic, size_t bits, DiArithmeticOp op)
     void di_arithmetic_destroy(DiArithmetic *arithmetic)
+
+cdef extern from "digisim/elements/multiplexer.h":
+    ctypedef struct DiMultiplexer:
+        DiElement element
+        size_t select_bits
+        size_t data_bits
+        size_t input_count
+        DiTerminal *inputs
+        DiTerminal select
+        DiTerminal output
+
+    void di_multiplexer_init(DiMultiplexer *multiplexer, size_t data_bits, size_t select_bits)
+    void di_multiplexer_destroy(DiMultiplexer *multiplexer)
