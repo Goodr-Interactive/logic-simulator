@@ -238,6 +238,7 @@ def create_arithmetic_pinout(position: tuple[int, int], attributes: dict[str, st
         (x, y): PinIdentifier(name='output', bits=width),
     }
 
+
 def create_multiplexer_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
     width = int(attributes.get('width', '1'))
     select = int(attributes.get('select', '1'))
