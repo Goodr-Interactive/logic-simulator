@@ -31,6 +31,8 @@ void di_register_changed(DiElement *element, DiSimulation *simulation) {
         di_signal_fill(&reg->value.signal, DI_BIT_LOW);
 
         di_terminal_send(&reg->value, simulation);
+
+        return;
     }
 
     if (di_signal_get(clock, 0) == DI_BIT_HIGH) {
@@ -39,15 +41,16 @@ void di_register_changed(DiElement *element, DiSimulation *simulation) {
 
             // Is the double buffer really more than we need?
             memcpy(reg->state, reg->hold, reg->bits * sizeof(bool));
-            di_signal_copy_from_list(&reg->value.signal, reg->state);
-
-            di_terminal_send(&reg->value, simulation);
         }
     } else {
         reg->did_send = false;
 
         di_signal_copy_into_list(data, reg->hold);
     }
+
+    di_signal_copy_from_list(&reg->value.signal, reg->state);
+
+    di_terminal_send(&reg->value, simulation);
 }
 
 void di_register_reset(DiElement *element) {

@@ -2,10 +2,16 @@
 
 #include <digisim/simulation.h>
 
+void di_input_changed(DiElement *element, DiSimulation *simulation) {
+    DiInput *input = (DiInput *)element;
+
+    di_input_emit(input, simulation);
+}
+
 void di_input_init(DiInput *input, size_t bits) {
     di_element_init(&input->element);
 
-    input->element.changed = NULL;
+    input->element.changed = di_input_changed;
 
     input->bits = bits;
 

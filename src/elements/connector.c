@@ -6,10 +6,8 @@ void di_connector_changed(DiElement *element, DiSimulation *simulation) {
     di_terminal_directional_read(&connector->connection_a, &connector->signal_a);
     di_terminal_directional_read(&connector->connection_b, &connector->signal_b);
 
-    // Merge signal_a + signal_b into signal_a
-    di_signal_merge(&connector->connection_a.signal, &connector->signal_a, &connector->signal_b);
-
     // Then move it back to signal_b
+    di_signal_copy(&connector->connection_a.signal, &connector->signal_b);
     di_signal_copy(&connector->connection_b.signal, &connector->signal_a);
 
     di_terminal_send(&connector->connection_a, simulation);

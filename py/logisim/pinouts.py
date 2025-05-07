@@ -30,10 +30,10 @@ def facing_to_direction(facing: str) -> tuple[int, int]:
 
 def facing_to_normal_direction(facing: str) -> tuple[int, int]:
     if facing == 'south':
-        return -1, 0
+        return +1, 0
 
     if facing == 'north':
-        return +1, 0
+        return -1, 0
 
     if facing == 'east':
         return 0, -1
@@ -143,22 +143,31 @@ def create_register_pinout(position: tuple[int, int], attributes: dict[str, str]
         (x, y + 30): PinIdentifier(name='data', bits=width),
         (x + 60, y + 30): PinIdentifier(name='value', bits=width),
         (x, y + 70): PinIdentifier(name='clock', bits=1),
+        (x + 30, y + 90): PinIdentifier(name='reset', bits=1),
     }
 
 
-def splitter_bit_per_pin(fanout: int, attributes: dict[str, str]) -> list[int]:
+def create_d_flip_flop_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+    x, y = position
+
+    return {
+        (x - 10, y + 10): PinIdentifier(name='data', bits=1),
+        (x + 50, y + 10): PinIdentifier(name='value', bits=1),
+        (x - 10, y + 50): PinIdentifier(name='clock', bits=1),
+        (x + 20, y + 60): PinIdentifier(name='reset', bits=1),
+    }
+
+
+def splitter_bit_per_pin(fanout: int, width: int, attributes: dict[str, str]) -> list[int]:
     result = [0] * fanout
 
-    for i in range(fanout):
+    for i in range(width):
         bit_name = f'bit{i}'
 
-        value = attributes.get(bit_name, i)
+        value = int(attributes.get(bit_name, i))
 
-        if value is not None:
-            value = int(value)
-
-            if value < fanout:
-                result[value] += 1
+        if value < fanout:
+            result[value] += 1
 
     return result
 
@@ -183,13 +192,17 @@ def create_splitter_pinout(position: tuple[int, int], attributes: dict[str, str]
     norm_x, norm_y = facing_to_normal_direction(facing)
     norm_x, norm_y = norm_x * norm_multiplier * spacing * 10, norm_y * norm_multiplier * spacing * 10
 
-    bits = splitter_bit_per_pin(fanout, attributes)
+    is_order_reversed = norm_x > 0 or norm_y < 0
+
+    bits = splitter_bit_per_pin(fanout, width, attributes)
 
     for i in range(fanout):
         pin_x = dir_x + norm_x * (i + 1) + x
         pin_y = dir_y + norm_y * (i + 1) + y
 
-        result[(pin_x, pin_y)] = PinIdentifier(name='split', index=i, bits=bits[i])
+        ordered_i = fanout - 1 - i if is_order_reversed else i
+
+        result[(pin_x, pin_y)] = PinIdentifier(name='split', index=ordered_i, bits=bits[ordered_i])
 
     return result
 
@@ -226,6 +239,58 @@ def create_arithmetic_pinout(position: tuple[int, int], attributes: dict[str, st
     }
 
 
+def create_multiplexer_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+    width = int(attributes.get('width', '1'))
+    select = int(attributes.get('select', '1'))
+    facing = attributes.get('facing', 'east')
+    select_loc = attributes.get('selloc', 'bl')
+    size = int(attributes.get('size', '30' if select == 1 else '40'))
+
+    input_count = 2 ** select
+
+    select_loc_mul = 1 if select_loc == 'bl' else -1
+
+    x, y = position
+
+    dir_x, dir_y = facing_to_direction(facing)
+    norm_x, norm_y = facing_to_normal_direction(facing)
+    norm_x, norm_y = -abs(norm_x), -abs(norm_y)  # always go left or up
+
+    result = {
+        (x, y): PinIdentifier(name='output', bits=width)
+    }
+
+    origin_x = x + dir_x * size
+    origin_y = y + dir_y * size
+
+    if input_count == 2:
+        result[(origin_x + norm_x * 10, origin_y + norm_y * 10)] = PinIdentifier(name='input', index=0, bits=width)
+        result[(origin_x - norm_x * 10, origin_y - norm_y * 10)] = PinIdentifier(name='input', index=1, bits=width)
+
+        select_x = origin_x - dir_x * 10 - norm_x * 20 * select_loc_mul
+        select_y = origin_y - dir_y * 10 - norm_y * 20 * select_loc_mul
+
+        result[(select_x, select_y)] = PinIdentifier(name='select', bits=select)
+    else:
+        half_count = input_count // 2
+
+        first_pin_x = origin_x + norm_x * 10 * half_count
+        first_pin_y = origin_y + norm_y * 10 * half_count
+
+        for i in range(input_count):
+            pin_x = first_pin_x - norm_x * 10 * i
+            pin_y = first_pin_y - norm_y * 10 * i
+
+            result[(pin_x, pin_y)] = PinIdentifier(name='input', index=i, bits=width)
+
+        select_x = origin_x - ((dir_x * size // 10) // 2) * 10 - norm_x * 10 * half_count * select_loc_mul
+        select_y = origin_y - ((dir_y * size // 10) // 2) * 10 - norm_y * 10 * half_count * select_loc_mul
+
+        result[(select_x, select_y)] = PinIdentifier(name='select', bits=select)
+
+    return result
+
+
 def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
     pinout_map = {
         'AND Gate': create_binary_gate_pinout,
@@ -239,6 +304,8 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
         'Register': create_register_pinout,
         'Splitter': create_splitter_pinout,
         'Bit Extender': create_bit_extender_pinout,
+        'Multiplexer': create_multiplexer_pinout,
+        'D Flip-Flop': create_d_flip_flop_pinout,
         'Constant': create_constant_pinout,
         'Power': create_constant_pinout,
         'Ground': create_constant_pinout,

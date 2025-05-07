@@ -4,8 +4,8 @@ from typing import Optional
 
 BIT_LOW = 0
 BIT_HIGH = 1
-BIT_ERROR = 3
-BIT_UNKNOWN = 4
+BIT_ERROR = 2
+BIT_UNKNOWN = 3
 
 GATE_AND = 0
 GATE_OR = 1
@@ -75,6 +75,7 @@ cdef class Node:
 
     def connect(self, terminal: Terminal):
         assert self.node.bits == terminal.terminal.bits
+        assert terminal.terminal.node == NULL
 
         di_connect(self.node, terminal.terminal)
 
@@ -194,6 +195,9 @@ cdef class Input(InsightElement):
 
     def set(self, index: int, bit: int):
         di_signal_set(&self.gate.signal, index, bit)
+
+    def get(self, index: int) -> int:
+        return di_signal_get(&self.gate.signal, index)
 
     def emit(self, simulation: Simulation):
         di_input_emit(self.gate, simulation.simulation)
@@ -388,6 +392,34 @@ cdef class BitExtender(Element):
         di_bit_extender_destroy(self.extender)
 
         PyMem_Free(self.extender)
+
+
+cdef class Multiplexer(Element):
+    cdef DiMultiplexer *multiplexer
+
+    def terminal(self, name: str, index: Optional[int]) -> Terminal:
+        if name == "input":
+            assert index is not None and index < self.multiplexer.input_count
+
+            return Terminal.create(self, &self.multiplexer.inputs[index])
+
+        if name == "output":
+            return Terminal.create(self, &self.multiplexer.output)
+
+        if name == "select":
+            return Terminal.create(self, &self.multiplexer.select)
+
+    def __init__(self, data_bits: int, select_bits: int):
+        self.multiplexer = <DiMultiplexer *> PyMem_Malloc(sizeof(DiMultiplexer))
+
+        di_multiplexer_init(self.multiplexer, data_bits, select_bits)
+
+    def __del__(self):
+        di_multiplexer_destroy(self.multiplexer)
+
+        PyMem_Free(self.multiplexer)
+
+
 cdef class ConstantValue(Element):
     cdef DiConstant *constant
 
