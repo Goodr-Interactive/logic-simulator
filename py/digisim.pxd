@@ -92,7 +92,7 @@ cdef extern from "digisim/element.h":
         DiTerminalList connections
 
     void di_element_changed(DiElement *element, DiSimulation *simulation)
-    void di_element_reset(DiElement *element, DiSimulation *simulation)
+    void di_element_reset(DiElement *element)
     void di_element_disconnect_all(DiElement *element, DiSimulation *simulation)
     void di_element_init(DiElement *element)
     void di_element_destroy(DiElement *element)
@@ -299,3 +299,31 @@ cdef extern from "digisim/elements/bit-extender.h":
 
     void di_bit_extender_init(DiBitExtender *extender, DiBitExtenderPolicy policy, size_t in_bits, size_t out_bits)
     void di_bit_extender_destroy(DiBitExtender *extender)
+cdef extern from "digisim/elements/constant.h":
+    ctypedef struct DiConstant:
+        DiElement element
+        size_t bits
+        uint64_t value
+        DiTerminal output
+
+    void di_constant_emit(DiConstant *constant, DiSimulation *simulation)
+    void di_constant_init(DiConstant *constant, size_t bits, uint64_t value)
+    void di_constant_destroy(DiConstant *constant)
+
+cdef extern from "digisim/elements/arithmetic.h":
+    ctypedef enum DiArithmeticOp:
+        DI_ARITHMETIC_OP_ADD = 0,
+        DI_ARITHMETIC_OP_SUB = 1,
+        DI_ARITHMETIC_OP_MUL = 2,
+        DI_ARITHMETIC_OP_MUL_SIGNED = 3,
+
+    ctypedef struct DiArithmetic:
+        DiElement element
+        size_t bits
+        DiArithmeticOp op
+        DiTerminal in_a
+        DiTerminal in_b
+        DiTerminal output
+
+    void di_arithmetic_init(DiArithmetic *arithmetic, size_t bits, DiArithmeticOp op)
+    void di_arithmetic_destroy(DiArithmetic *arithmetic)

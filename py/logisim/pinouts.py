@@ -149,8 +149,6 @@ def create_register_pinout(position: tuple[int, int], attributes: dict[str, str]
 def splitter_bit_per_pin(fanout: int, attributes: dict[str, str]) -> list[int]:
     result = [0] * fanout
 
-    other = 0
-
     for i in range(fanout):
         bit_name = f'bit{i}'
 
@@ -204,7 +202,27 @@ def create_bit_extender_pinout(position: tuple[int, int], attributes: dict[str, 
 
     return {
         (x - 40, y): PinIdentifier(name='input', bits=in_width),
-        (x, y): PinIdentifier(name='output', bits=out_width)
+        (x, y): PinIdentifier(name='output', bits=out_width),
+    }
+
+
+def create_constant_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+    width = int(attributes.get('width', '1'))
+
+    return {
+        position: PinIdentifier(name='output', bits=width)
+    }
+
+
+def create_arithmetic_pinout(position: tuple[int, int], attributes: dict[str, str]) -> Pinout:
+    x, y = position
+
+    width = int(attributes.get('width', '8'))
+
+    return {
+        (x - 40, y - 10): PinIdentifier(name='in_a', bits=width),
+        (x - 40, y + 10): PinIdentifier(name='in_b', bits=width),
+        (x, y): PinIdentifier(name='output', bits=width),
     }
 
 
@@ -221,6 +239,12 @@ def create_pinout(gate: str, position: tuple[int, int], attributes: dict[str, st
         'Register': create_register_pinout,
         'Splitter': create_splitter_pinout,
         'Bit Extender': create_bit_extender_pinout,
+        'Constant': create_constant_pinout,
+        'Power': create_constant_pinout,
+        'Ground': create_constant_pinout,
+        'Adder': create_arithmetic_pinout,
+        'Subtractor': create_arithmetic_pinout,
+        'Multiplier': create_arithmetic_pinout,
     }
 
     pinout_factory = pinout_map.get(gate)

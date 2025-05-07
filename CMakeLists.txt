@@ -25,9 +25,15 @@ add_library(digisim
     include/digisim/elements/connector.h
     include/digisim/elements/splitter.h
     include/digisim/elements/bit-extender.h
+    include/digisim/elements/arithmetic.h
+    include/digisim/elements/negate.h
+    include/digisim/elements/shifter.h
+    include/digisim/elements/comparator.h
+    include/digisim/elements/constant.h
     include/digisim/utility/node-list.h
     include/digisim/utility/terminal-list.h
     include/digisim/utility/gate_inputs.h
+    include/digisim/utility/signed.h
 
     src/node.c
     src/signal.c
@@ -49,9 +55,15 @@ add_library(digisim
     src/elements/connector.c
     src/elements/splitter.c
     src/elements/bit-extender.c
+    src/elements/arithmetic.c
+    src/elements/shifter.c
+    src/elements/negate.c
+    src/elements/comparator.c
+    src/elements/constant.c
     src/utility/node-list.c
     src/utility/terminal-list.c
     src/utility/gate_inputs.c
+    src/utility/signed.c
 )
 
 set_target_properties(digisim PROPERTIES C_STANDARD 11)

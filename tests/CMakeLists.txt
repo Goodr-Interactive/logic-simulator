@@ -23,6 +23,7 @@ add_executable(digisim-tests
     test_fighting.cpp
     test_splitter.cpp
     test_bit_extender.cpp
+    test_arithmetic.cpp
 )
 
 set_target_properties(digisim-tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
